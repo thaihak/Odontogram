@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Odontogram - Dental Chart</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        min-height: 800px; /* Provide a consistent height for transitions */
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #333;
+      }
+
+      .odontogram {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      .arch {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .arch.hidden {
+        display: none !important;
+      }
+
+      .arch-label {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        display: flex;
+        align-items: center;
+        min-width: 40px;
+        font-weight: bold;
+        color: #666;
+      }
+
+      .arch-content {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 2px; /* Fixes the midline gap so the arch looks continuous */
+      }
+
+      .teeth-row {
+        display: flex;
+        gap: 2px;
+        align-items: flex-start; /* Ensures everything aligns perfectly from the top */
+        flex-wrap: nowrap; /* Forces everything into a single straight line */
+        justify-content: center;
+      }
+
+      .teeth-group {
+        display: flex;
+        gap: 2px;
+        align-items: center;
+      }
+
+      .quadrant {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .quadrant-header {
+        font-weight: bold;
+        color: #666;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .tooth {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 50px;
+        position: relative;
+        z-index: 1;
+        user-select: none; /* Prevent accidental text highlighting when double-clicking */
+      }
+
+      .tooth:hover {
+        z-index: 10;
+      }
+
+      .tooth.tight {
+        width: 40px;
+        margin-left: -1px;
+      }
+
+      .tooth-views {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .tooth-view-item {
+        width: 60px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        pointer-events: none; /* Ignore clicks on transparent container area */
+      }
+
+      .tooth-view-item.normal {
+        width: 80px;
+        height: 80px;
+        position: relative; /* Added to support the new normal-overlay */
+      }
+
+      .tooth-view-item.normal-back {
+        width: 80px;
+        height: 80px;
+      }
+
+      /* Hide normal-back view when the 'All' filter is active on the main chart */
+      #mainView[data-view-mode="all"] .tooth-view-item.normal-back {
+        display: none;
+      }
+
+      .tooth-view-item.top {
+        width: 70px;
+        height: 40px;
+        position: relative;
+      }
+
+      .tooth.upper .tooth-views {
+        flex-direction: column;
+      }
+
+      .tooth.lower .tooth-views {
+        flex-direction: column;
+      }
+
+      .tooth-view-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Shrinks images proportionally inside the containers */
+        pointer-events: auto; /* Re-enable clicks exactly on the image */
+      }
+
+      .tooth-view-item:hover {
+        filter: brightness(0.9);
+        transform: scale(1.05);
+      }
+
+      .section-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 1 !important;
+        transition: opacity 0.3s ease;
+        overflow: visible;
+        box-sizing: border-box;
+        pointer-events: none; /* Let clicks pass through empty spaces */
+      }
+
+      /* Hide empty sections on both top and normal views by default */
+      .section-overlay path:not(.healthy):not(.missing):not(.treated) {
+        fill: transparent !important;
+        stroke: transparent !important;
+        opacity: 0 !important;
+      }
+
+      /* Reveal them boldly when hovered over so we know where to click */
+      .section-overlay path:not(.healthy):not(.missing):not(.treated):hover {
+        fill: rgba(0, 0, 0, 0.25) !important;
+        stroke: #333 !important;
+        stroke-width: 3px !important;
+        opacity: 1 !important;
+      }
+
+      .section-overlay path.healthy,
+      .section-overlay path.missing,
+      .section-overlay path.treated {
+        opacity: 0.7 !important;
+        stroke-width: 1.5px !important;
+        filter: none !important;
+      }
+
+      .section-overlay path.healthy:hover,
+      .section-overlay path.missing:hover,
+      .section-overlay path.treated:hover {
+        opacity: 0.9 !important;
+        stroke-width: 3px !important;
+      }
+
+      .tooth-view-item.top:hover .section-overlay:not(.top-overlay) {
+        opacity: 0.5;
+      }
+
+      .tooth-view-item.normal:hover .section-overlay:not(.normal-overlay) {
+        opacity: 0.5;
+      }
+
+      .section-overlay svg {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        cursor: pointer;
+        pointer-events: none; /* Fix bounding box click interception */
+      }
+
+      .section-overlay path {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        stroke-width: 0.5px;
+        stroke: rgba(0, 0, 0, 0.1);
+        pointer-events: all; /* Important: Catches mouse events over the entire fill geometry even if transparent */
+      }
+
+      /* Base hover rule for ALL paths (bold borders + slight fill) */
+      .section-overlay path:hover {
+        stroke-width: 3px !important;
+        stroke: #333 !important;
+        fill: rgba(0, 0, 0, 0.15) !important;
+        filter: brightness(1.1);
+        opacity: 1 !important;
+      }
+
+      .section-overlay path.healthy {
+        fill: #c9b496;
+        stroke: #6b5f4f;
+        stroke-width: 3px;
+        filter: drop-shadow(0 0 3px #6b5f4f);
+      }
+
+      .section-overlay path.missing {
+        fill: #ff9999;
+        stroke: #bb3333;
+        stroke-width: 3px;
+        filter: drop-shadow(0 0 3px #bb3333);
+      }
+
+      .section-overlay path.treated {
+        fill: #b3b3ff;
+        stroke: #3333bb;
+        stroke-width: 3px;
+        filter: drop-shadow(0 0 3px #3333bb);
+      }
+
+      /* --- Quadrant-based SVG Mirroring --- */
+      /* Q1 (11-18) is standard, no transform needed */
+
+      /* Q2 (21-28): Invert horizontal */
+      .tooth.q2 .section-overlay svg {
+        transform: scaleX(-1);
+      }
+
+      /* Q3 (31-38): Invert horizontal & vertical (Mirror of Q2) */
+      .tooth.q3 .section-overlay svg {
+        transform: scale(-1, -1);
+      }
+
+      /* Q4 (41-48): Invert vertical (Mirror of Q1) */
+      .tooth.q4 .section-overlay svg {
+        transform: scaleY(-1);
+      }
+
+      .tooth-graphic {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        order: 1;
+      }
+
+      .tooth-graphic img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .tooth-graphic:hover {
+        filter: brightness(0.9);
+        transform: scale(1.05);
+      }
+
+      /* Formatting numbers to mimic the visual layout between arches */
+      .tooth-number {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        color: #777;
+        font-weight: 600;
+      }
+
+      /* Place the upper numbers BELOW the upper tooth graphics */
+      .tooth.upper .tooth-views {
+        order: 1;
+      }
+      .tooth.upper .tooth-number {
+        order: 2;
+        margin-top: 15px;
+      }
+
+      /* Place the lower numbers ABOVE the lower tooth graphics */
+      .tooth.lower .tooth-number {
+        order: 1;
+        margin-bottom: 15px;
+      }
+      .tooth.lower .tooth-views {
+        order: 2;
+      }
+
+      .quadrant-label {
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+        font-weight: bold;
+      }
+
+      .legend {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        border-left: 4px solid #999;
+      }
+
+      .legend h3 {
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .legend-item {
+        display: inline-block;
+        margin-right: 20px;
+        margin-bottom: 10px;
+      }
+
+      .legend-color {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        margin-right: 8px;
+        vertical-align: middle;
+        border: 1px solid #999;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      .controls button {
+        padding: 10px 20px;
+        font-size: 14px;
+        border: 1px solid #999;
+        background-color: #f0f0f0;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+      }
+
+      .controls button:hover {
+        background-color: #e0e0e0;
+      }
+
+      .controls button.active {
+        background-color: #333;
+        color: white;
+        border-color: #333;
+      }
+
+      .arch-label {
+        display: none;
+      }
+
+      .quadrant-header {
+        display: none;
+      }
+
+      /* Single Tooth Editor Screen Styles */
+      #singleToothView {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        animation: fadeIn 0.3s ease-in-out;
+      }
+
+      .screen-header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        margin-bottom: 40px;
+        position: relative;
+      }
+
+      .back-btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: absolute;
+        left: 0;
+        pointer-events: auto;
+      }
+
+      .back-btn:hover {
+        background-color: #eaeaea;
+        border-color: #bbb;
+      }
+
+      .single-tooth-title {
+        flex: 1;
+        text-align: center;
+        font-size: 24px;
+        color: #333;
+        margin: 0;
+      }
+
+      .editor-layout {
+        display: flex;
+        width: 100%;
+        gap: 40px;
+        align-items: flex-start;
+        padding-top: 20px;
+      }
+
+      #singleToothEditor {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 0 0 auto;
+        min-height: 400px;
+      }
+
+      .editor-right-panel {
+        flex: 1;
+        background-color: #fafafa;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 40px;
+        min-height: 400px;
+        color: #666;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .editor-right-panel h3 {
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      /* Action Log Styles */
+      .action-log-container {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #eaeaea;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        flex-grow: 1;
+      }
+
+      .action-log-container h4 {
+        margin-bottom: 15px;
+        color: #444;
+        font-size: 16px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 8px;
+      }
+
+      #actionLogList {
+        list-style: none;
+        padding: 0;
+      }
+
+      #actionLogList li {
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+        color: #555;
+        animation: fadeIn 0.3s ease-in-out;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: capitalize;
+      }
+
+      .status-badge.healthy {
+        background: #e3ddc7;
+        color: #6b5f4f;
+        border: 1px solid #c9b496;
+      }
+      .status-badge.missing {
+        background: #ffe0e0;
+        color: #bb3333;
+        border: 1px solid #ff9999;
+      }
+      .status-badge.treated {
+        background: #e0e0ff;
+        color: #3333bb;
+        border: 1px solid #b3b3ff;
+      }
+
+      .tooth.in-editor {
+        transform: scale(1.6);
+        margin: 0 40px;
+        z-index: 10;
+        pointer-events: auto;
+      }
+
+      .tooth.in-editor:hover {
+        transform: scale(1.6);
+      }
+
+      .tooth.placeholder {
+        visibility: hidden;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="appContainer">
+      <!-- MAIN VIEW SCREEN (data-view-mode defaults to "all") -->
+      <div id="mainView" data-view-mode="all">
+        <h1>Odontogram - Dental Chart System</h1>
+
+        <div class="controls">
+          <button id="btnUpper" class="view-btn" data-view="upper">
+            Upper
+          </button>
+          <button id="btnLower" class="view-btn" data-view="lower">
+            Lower
+          </button>
+          <button id="btnAll" class="view-btn active" data-view="all">
+            All
+          </button>
+        </div>
+
+        <div class="odontogram">
+          <!-- Upper Teeth -->
+          <div class="arch">
+            <div class="arch-label">UPPER</div>
+            <div class="arch-content">
+              <div id="upperLeft" class="quadrant"></div>
+              <div id="upperRight" class="quadrant"></div>
+            </div>
+          </div>
+
+          <!-- Lower Teeth -->
+          <div class="arch">
+            <div class="arch-label">LOWER</div>
+            <div class="arch-content">
+              <div id="lowerRight" class="quadrant"></div>
+              <div id="lowerLeft" class="quadrant"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <h3>Legend</h3>
+          <div class="legend-item">
+            <span
+              class="legend-color"
+              style="
+                background: linear-gradient(135deg, #e3ddc7 0%, #fefefe 100%);
+              "
+            ></span>
+            <span>Healthy Tooth</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #ffe0e0"></span>
+            <span>Missing Tooth</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #e0e0ff"></span>
+            <span>Treated Tooth</span>
+          </div>
+          <br />
+          <small>
+            <strong>FDI Numbering System:</strong><br />
+            Upper Right (Screen Left): 18-11 | Upper Left (Screen Right):
+            21-28<br />
+            Lower Right (Screen Left): 48-41 | Lower Left (Screen Right):
+            31-38<br />
+            <strong>Quadrants:</strong> UR = Upper Right, UL = Upper Left, LR =
+            Lower Right, LL = Lower Left<br />
+            <strong>Tip:</strong> <strong>Double-click</strong> the realistic
+            <strong>top-down or front image</strong> to change the status of the
+            entire tooth at once. Click individual sections or paths to target
+            specific areas. Click transparent/empty areas around the tooth to
+            isolate it into the editor.
+          </small>
+        </div>
+      </div>
+
+      <!-- SINGLE TOOTH EDITOR SCREEN (Hidden by default) -->
+      <div id="singleToothView">
+        <div class="screen-header">
+          <button class="back-btn" id="backToChartBtn">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Chart
+          </button>
+          <h2 class="single-tooth-title" id="singleToothTitle">
+            Editing Tooth
+          </h2>
+        </div>
+
+        <div class="editor-layout">
+          <div id="singleToothEditor"></div>
+          <div class="editor-right-panel">
+            <h3>Treatment Details & Notes</h3>
+            <p>
+              This space is reserved for your input forms, treatment history,
+              and specific notes for this isolated tooth. The tooth graphic
+              stays cleanly on the left.
+            </p>
+
+            <!-- Dynamic Action Log Container -->
+            <div class="action-log-container">
+              <h4>Recent Activity Log</h4>
+              <ul id="actionLogList">
+                <li id="emptyLogState">
+                  <em
+                    >No sections modified yet. Click on the tooth sections to
+                    see labels.</em
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- GLOBAL ACTION LOGGER ---
+      function logAction(toothFDI, sectionName, newStatus) {
+        const logList = document.getElementById("actionLogList");
+        const emptyState = document.getElementById("emptyLogState");
+
+        // Remove empty state message if it exists
+        if (emptyState) {
+          emptyState.remove();
+        }
+
+        const li = document.createElement("li");
+        const timeString = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+
+        li.innerHTML = `
+          <strong style="color:#888;">[${timeString}]</strong> 
+          Tooth <strong>${toothFDI}</strong>: 
+          <span style="color:#222; font-weight:500;">${sectionName}</span> marked as 
+          <span class="status-badge ${newStatus}">${newStatus}</span>
+        `;
+
+        // Prepend to top of list
+        logList.insertBefore(li, logList.firstChild);
+
+        // Keep only the 8 most recent actions
+        if (logList.children.length > 8) {
+          logList.removeChild(logList.lastChild);
+        }
+      }
+
+      // Passed displayLabel to use the quadrant (FDI) number visually,
+      // while keeping toothNumber strictly for the SVG images.
+      function createToothElement(toothNumber, displayLabel, isUpper = true) {
+        const tooth = document.createElement("div");
+        tooth.className = "tooth " + (isUpper ? "upper" : "lower");
+
+        // Dynamically extract the quadrant number from the FDI label (1, 2, 3, or 4)
+        // and assign it as a class (q1, q2, q3, q4) so CSS can flip the SVGs
+        const fdiQuadrantDigit = displayLabel.toString().charAt(0);
+        tooth.classList.add("q" + fdiQuadrantDigit);
+
+        // Add tight class for specific internal tooth numbers
+        if (
+          [
+            4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20, 21, 22, 23, 24, 25, 26, 27,
+            28, 29,
+          ].includes(toothNumber)
+        ) {
+          tooth.classList.add("tight");
+        }
+
+        // Determine tooth type based on your original order logic
+        let sectionType = "normal";
+        const molars = [1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32];
+        const premolars = [4, 5, 12, 13, 20, 21, 28, 29];
+
+        if (molars.includes(toothNumber)) {
+          sectionType = "molar";
+        } else if (premolars.includes(toothNumber)) {
+          sectionType = "premolar";
+        }
+
+        // Assign sectionType as a class to specifically style 'normal' (front teeth) sections
+        tooth.classList.add("type-" + sectionType);
+
+        const number = document.createElement("div");
+        number.className = "tooth-number";
+        number.textContent = displayLabel; // Using FDI Number here
+
+        // Create views container
+        const views = document.createElement("div");
+        views.className = "tooth-views";
+
+        // ----------- TOP VIEW SETUP -----------
+        const topView = document.createElement("div");
+        topView.className = "tooth-view-item top";
+
+        const topImg = document.createElement("img");
+        topImg.src = "top/" + toothNumber + " top.svg";
+        topImg.alt = "Top view - Tooth " + displayLabel;
+        topView.appendChild(topImg);
+
+        const topOverlay = document.createElement("div");
+        topOverlay.className = "section-overlay top-overlay";
+        topView.appendChild(topOverlay);
+
+        const svgPathTop = "top/top-" + sectionType + "-section.svg";
+        fetch(svgPathTop)
+          .then((response) => response.text())
+          .then((svgContent) => {
+            topOverlay.innerHTML = svgContent;
+            const topPaths = topOverlay.querySelectorAll("path");
+            const pathStatusTop = {};
+            const statusCycle = ["healthy", "missing", "treated"];
+            let currentGlobalStatusTop = -1;
+
+            const handleTopDoubleClick = (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              currentGlobalStatusTop =
+                (currentGlobalStatusTop + 1) % statusCycle.length;
+              const activeStatus = statusCycle[currentGlobalStatusTop];
+              topPaths.forEach((path, index) => {
+                pathStatusTop[index] = currentGlobalStatusTop;
+                path.classList.remove("healthy", "missing", "treated");
+                path.classList.add(activeStatus);
+              });
+              logAction(displayLabel, "Entire Top View", activeStatus);
+            };
+
+            topView.addEventListener("dblclick", handleTopDoubleClick);
+
+            // Dynamic mapping array for Top Section anatomical labels based on tooth type
+            let topAnatomyLabels = [];
+            if (sectionType === "molar") {
+              topAnatomyLabels = [
+                "Tooth " + displayLabel,
+                "Occlusal",
+                "Mesial",
+                "Distal",
+
+                "Mesio Palatal Cusp",
+                "Disto Palatal Cusp",
+                "Mesio Buccal Cusp",
+                "Disto Buccal Cusp",
+              ];
+            } else if (sectionType === "premolar") {
+              topAnatomyLabels = [
+                "Tooth " + displayLabel,
+                "Mesial",
+                "Buccal Cusp",
+                "Buccal Surface",
+
+                "Palatal Cusp",
+                "Palatal Surface",
+
+                "Distal",
+
+                "Occlusal",
+              ];
+            } else {
+              // Normal (Anterior)
+              topAnatomyLabels = [
+                "Tooth " + displayLabel,
+                "Distal",
+                "Palatal Surface",
+                "Mesial",
+                "Buccal Surface",
+                "Incisal",
+              ];
+            }
+
+            topPaths.forEach((path, index) => {
+              pathStatusTop[index] = -1;
+
+              // --- DYNAMIC SVG LABELING ---
+              // Fallback directly to the custom anatomical array if id/name is missing
+              const fallbackName =
+                topAnatomyLabels[index] || `Top Section ${index + 1}`;
+              const sectionNameRaw =
+                path.id || path.getAttribute("name") || fallbackName;
+
+              // Format label to look pretty (e.g., "mesial" -> "Mesial")
+              const sectionLabel =
+                sectionNameRaw.charAt(0).toUpperCase() +
+                sectionNameRaw.slice(1).replace(/[-_]/g, " ");
+
+              // Add native SVG tooltip for hover functionality
+              const tooltipElement = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "title",
+              );
+              tooltipElement.textContent = sectionLabel;
+              path.appendChild(tooltipElement);
+
+              const handlePathClick = function (e) {
+                e.stopPropagation();
+                pathStatusTop[index] =
+                  (pathStatusTop[index] + 1) % statusCycle.length;
+                const activeStatus = statusCycle[pathStatusTop[index]];
+                path.classList.remove("healthy", "missing", "treated");
+                path.classList.add(activeStatus);
+
+                // Log this specific action to the UI panel
+                logAction(displayLabel, sectionLabel, activeStatus);
+              };
+              path.addEventListener("click", handlePathClick);
+            });
+          })
+          .catch((err) =>
+            console.log("Could not load top section overlay:", err),
+          );
+
+        // ----------- NORMAL VIEW SETUP -----------
+        const normalView = document.createElement("div");
+        normalView.className = "tooth-view-item normal";
+        normalView.title =
+          "Click empty areas to isolate and edit details. Double click to select all.";
+
+        const normalImg = document.createElement("img");
+        normalImg.src = "normal/" + toothNumber + ".svg";
+        normalImg.alt = "Normal view - Tooth " + displayLabel;
+        normalView.appendChild(normalImg);
+
+        // Add the new transparent overlay for the normal view
+        const normalOverlay = document.createElement("div");
+        normalOverlay.className = "section-overlay normal-overlay";
+        normalView.appendChild(normalOverlay);
+
+        // Load the corresponding normal-section SVG (e.g. normal/molar-section.svg)
+        const svgPathNormal = "normal/" + sectionType + "-section.svg";
+        fetch(svgPathNormal)
+          .then((response) => response.text())
+          .then((svgContent) => {
+            normalOverlay.innerHTML = svgContent;
+            const normalPaths = normalOverlay.querySelectorAll("path");
+            const pathStatusNormal = {};
+            const statusCycle = ["healthy", "missing", "treated"];
+            let currentGlobalStatusNormal = -1;
+
+            const handleNormalDoubleClick = (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              currentGlobalStatusNormal =
+                (currentGlobalStatusNormal + 1) % statusCycle.length;
+              const activeStatus = statusCycle[currentGlobalStatusNormal];
+              normalPaths.forEach((path, index) => {
+                pathStatusNormal[index] = currentGlobalStatusNormal;
+                path.classList.remove("healthy", "missing", "treated");
+                path.classList.add(activeStatus);
+              });
+              logAction(displayLabel, "Entire Front View", activeStatus);
+            };
+
+            normalView.addEventListener("dblclick", handleNormalDoubleClick);
+
+            normalPaths.forEach((path, index) => {
+              pathStatusNormal[index] = -1;
+
+              // --- DYNAMIC SVG LABELING ---
+              // Attempt to read id or name from the SVG. Fall back to a numbered label if missing.
+              const sectionNameRaw =
+                path.id ||
+                path.getAttribute("name") ||
+                `Front Section ${index + 1}`;
+
+              // Format label to look pretty
+              const sectionLabel =
+                sectionNameRaw.charAt(0).toUpperCase() +
+                sectionNameRaw.slice(1).replace(/[-_]/g, " ");
+
+              // Add native SVG tooltip for hover functionality
+              const tooltipElement = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "title",
+              );
+              tooltipElement.textContent = sectionLabel;
+              path.appendChild(tooltipElement);
+
+              const handlePathClick = function (e) {
+                e.stopPropagation();
+                pathStatusNormal[index] =
+                  (pathStatusNormal[index] + 1) % statusCycle.length;
+                const activeStatus = statusCycle[pathStatusNormal[index]];
+                path.classList.remove("healthy", "missing", "treated");
+                path.classList.add(activeStatus);
+
+                // Log this specific action to the UI panel
+                logAction(displayLabel, sectionLabel, activeStatus);
+              };
+              path.addEventListener("click", handlePathClick);
+            });
+          })
+          .catch((err) =>
+            console.log("Could not load normal section overlay:", err),
+          );
+
+        // ----------- NORMAL BACK VIEW SETUP -----------
+        const normalBackView = document.createElement("div");
+        normalBackView.className = "tooth-view-item normal-back";
+        normalBackView.title =
+          "Click to isolate and edit details for Tooth " + displayLabel;
+
+        const normalBackImg = document.createElement("img");
+        normalBackImg.src = "normal-back-view/" + toothNumber + ".svg";
+        normalBackImg.alt = "Normal back view - Tooth " + displayLabel;
+        normalBackView.appendChild(normalBackImg);
+
+        // --- Single Page App Screen Transition Trigger ---
+        const isolateTooth = function () {
+          const mainView = document.getElementById("mainView");
+          const singleView = document.getElementById("singleToothView");
+          const container = document.getElementById("singleToothEditor");
+          const title = document.getElementById("singleToothTitle");
+
+          title.textContent = "Editing Tooth " + displayLabel;
+
+          activePlaceholder = document.createElement("div");
+          activePlaceholder.className = tooth.className + " placeholder";
+          tooth.parentNode.insertBefore(activePlaceholder, tooth);
+
+          container.appendChild(tooth);
+          tooth.classList.add("in-editor");
+
+          mainView.style.display = "none";
+          singleView.style.display = "flex";
+          activeTooth = tooth;
+
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+
+        // If user clicks gaps inside the container (bypassing the overlay paths), isolate tooth
+        normalImg.addEventListener("click", isolateTooth);
+        normalBackImg.addEventListener("click", isolateTooth);
+
+        // Add views based on tooth position
+        if (isUpper) {
+          views.appendChild(normalView);
+          views.appendChild(topView);
+          views.appendChild(normalBackView);
+        } else {
+          views.appendChild(normalBackView);
+          views.appendChild(topView);
+          views.appendChild(normalView);
+        }
+
+        tooth.appendChild(number);
+        tooth.appendChild(views);
+
+        return tooth;
+      }
+
+      function generateTeeth() {
+        // Upper Left (Internally: 17-24 | Visual: Screen Left | FDI: 18-11)
+        const upperLeftContainer = document.getElementById("upperLeft");
+        const ulHeader = document.createElement("div");
+        ulHeader.className = "quadrant-header";
+        ulHeader.textContent = "UL";
+        upperLeftContainer.appendChild(ulHeader);
+
+        const upperLeftRow = document.createElement("div");
+        upperLeftRow.className = "teeth-row";
+        let fdiQ1 = 18;
+        for (let i = 17; i <= 24; i++) {
+          const tooth = createToothElement(i, fdiQ1, true);
+          upperLeftRow.appendChild(tooth);
+          fdiQ1--;
+        }
+        upperLeftContainer.appendChild(upperLeftRow);
+
+        // Upper Right (Internally: 25-32 | Visual: Screen Right | FDI: 21-28)
+        const upperRightContainer = document.getElementById("upperRight");
+        const urHeader = document.createElement("div");
+        urHeader.className = "quadrant-header";
+        urHeader.textContent = "UR";
+        upperRightContainer.appendChild(urHeader);
+
+        const upperRightRow = document.createElement("div");
+        upperRightRow.className = "teeth-row";
+        let fdiQ2 = 21;
+        for (let i = 25; i <= 32; i++) {
+          const tooth = createToothElement(i, fdiQ2, true);
+          upperRightRow.appendChild(tooth);
+          fdiQ2++;
+        }
+        upperRightContainer.appendChild(upperRightRow);
+
+        // Lower Right (Internally: 1-8 | Visual: Screen Left | FDI: 48-41)
+        const lowerRightContainer = document.getElementById("lowerRight");
+        const lrHeader = document.createElement("div");
+        lrHeader.className = "quadrant-header";
+        lrHeader.textContent = "LR";
+        lowerRightContainer.appendChild(lrHeader);
+
+        const lowerRightRow = document.createElement("div");
+        lowerRightRow.className = "teeth-row";
+        let fdiQ4 = 48;
+        for (let i = 1; i <= 8; i++) {
+          const tooth = createToothElement(i, fdiQ4, false);
+          lowerRightRow.appendChild(tooth);
+          fdiQ4--;
+        }
+        lowerRightContainer.appendChild(lowerRightRow);
+
+        // Lower Left (Internally: 9-16 | Visual: Screen Right | FDI: 31-38)
+        const lowerLeftContainer = document.getElementById("lowerLeft");
+        const llHeader = document.createElement("div");
+        llHeader.className = "quadrant-header";
+        llHeader.textContent = "LL";
+        lowerLeftContainer.appendChild(llHeader);
+
+        const lowerLeftRow = document.createElement("div");
+        lowerLeftRow.className = "teeth-row";
+        let fdiQ3 = 31;
+        for (let i = 9; i <= 16; i++) {
+          const tooth = createToothElement(i, fdiQ3, false);
+          lowerLeftRow.appendChild(tooth);
+          fdiQ3++;
+        }
+        lowerLeftContainer.appendChild(lowerLeftRow);
+      }
+
+      // Initialize Chart
+      generateTeeth();
+
+      // --- Screen Transition Logic ---
+      let activeTooth = null;
+      let activePlaceholder = null;
+
+      function closeEditorScreen() {
+        if (activeTooth && activePlaceholder) {
+          activeTooth.classList.remove("in-editor");
+          activePlaceholder.parentNode.insertBefore(
+            activeTooth,
+            activePlaceholder,
+          );
+          activePlaceholder.remove();
+
+          activeTooth = null;
+          activePlaceholder = null;
+        }
+        document.getElementById("singleToothView").style.display = "none";
+        document.getElementById("mainView").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      document
+        .getElementById("backToChartBtn")
+        .addEventListener("click", closeEditorScreen);
+
+      // Toggle view functionality (Upper/Lower/All)
+      const viewButtons = document.querySelectorAll(".view-btn");
+      const upperArch = document.querySelector(".arch:has(#upperLeft)");
+      const lowerArch = document.querySelector(".arch:has(#lowerRight)");
+
+      viewButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          const view = this.dataset.view;
+
+          viewButtons.forEach((btn) => btn.classList.remove("active"));
+          this.classList.add("active");
+
+          document
+            .getElementById("mainView")
+            .setAttribute("data-view-mode", view);
+
+          if (view === "upper") {
+            upperArch.classList.remove("hidden");
+            lowerArch.classList.add("hidden");
+          } else if (view === "lower") {
+            upperArch.classList.add("hidden");
+            lowerArch.classList.remove("hidden");
+          } else if (view === "all") {
+            upperArch.classList.remove("hidden");
+            lowerArch.classList.remove("hidden");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
