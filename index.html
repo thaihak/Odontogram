@@ -3710,8 +3710,9 @@
                 "Root",
                 "Buccal",
                 "Buccal Surface",
-                "Distal",
                 "Mesial",
+                "Distal",
+
                 "Cervical Buccal",
               ];
             } else {
@@ -3816,12 +3817,12 @@
               backAnatomyLabels = [
                 "Tooth " + displayLabel,
                 "Root",
-                "Palatal",
-
-                "Palatal Surface",
-                "Distal",
+                "Buccal",
+                "Buccal Surface",
                 "Mesial",
-                "Cervical Palatal",
+                "Distal",
+
+                "Cervical Buccal",
               ];
             } else {
               backAnatomyLabels = [
@@ -3876,6 +3877,8 @@
           const singleView = document.getElementById("singleToothView");
           const container = document.getElementById("singleToothEditor");
           const title = document.getElementById("singleToothTitle");
+          const sidebar = document.getElementById("conditionSidebar");
+          const mainContent = document.querySelector(".main-content");
 
           title.textContent = "Editing Tooth " + displayLabel;
 
@@ -3889,6 +3892,17 @@
           mainView.style.display = "none";
           singleView.style.display = "flex";
           activeTooth = tooth;
+
+          // Ensure sidebar stays/becomes visible in the detail screen
+          // Always pin it to the right side in detail view for simplicity
+          sidebar.classList.remove("sidebar-left", "sidebar-right");
+          sidebar.classList.add("sidebar-right");
+          sidebar.classList.add("show");
+          // Remove main-content margin adjustments (not needed in single view)
+          mainContent.classList.remove(
+            "sidebar-open-left",
+            "sidebar-open-right",
+          );
 
           document.getElementById("isolateToothBtn").style.display = "none"; // Hide isolate button in single view
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -3991,6 +4005,8 @@
         document.getElementById("singleToothView").style.display = "none";
         document.getElementById("mainView").style.display = "block";
         document.getElementById("isolateToothBtn").style.display = "block";
+        // Close the sidebar cleanly when returning to chart
+        closeSidebar();
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
