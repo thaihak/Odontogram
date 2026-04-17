@@ -5,6 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Odontogram - Dental Chart</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="extra-styles.css" />
+    <style>
+      /* Embedded Brace Positioning & Sizing overrides */
+      .tooth-view-item.normal {
+        position: relative;
+      }
+
+      .brace-overlay {
+        position: absolute;
+        width: 45%; /* Make the brace smaller and proportional */
+        height: auto;
+        left: 50%;
+        pointer-events: none; /* Let clicks pass through to the path below */
+        z-index: 2; /* Sits above the tooth, below the path */
+        display: none; /* Hidden by default */
+      }
+
+      /* Upper teeth: Root is top, crown is bottom. Place brace at ~75% down */
+      .tooth.upper .brace-overlay {
+        top: 75%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* Lower teeth: Crown is top, root is bottom. Place brace at ~25% down */
+      .tooth.lower .brace-overlay {
+        top: 25%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* Ensure the brace wire SVG acts as an overlay */
+      .brace-wires {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1; /* Sits tightly behind the brace but above the tooth */
+        overflow: visible;
+      }
+    </style>
   </head>
 
   <body>
@@ -159,7 +200,8 @@
             <!-- Upper Teeth -->
             <div class="arch">
               <div class="arch-label">UPPER</div>
-              <div class="arch-content">
+              <div class="arch-content" style="position: relative">
+                <svg class="brace-wires" id="upperBraceWires"></svg>
                 <div id="upperLeft" class="quadrant"></div>
                 <div id="upperRight" class="quadrant"></div>
               </div>
@@ -168,7 +210,8 @@
             <!-- Lower Teeth -->
             <div class="arch">
               <div class="arch-label">LOWER</div>
-              <div class="arch-content">
+              <div class="arch-content" style="position: relative">
+                <svg class="brace-wires" id="lowerBraceWires"></svg>
                 <div id="lowerRight" class="quadrant"></div>
                 <div id="lowerLeft" class="quadrant"></div>
               </div>
@@ -445,6 +488,27 @@
                   Implant
                 </label>
                 <label class="tool-btn">
+                  <input type="radio" name="conditionTool" value="brace" />
+                  <span
+                    class="tool-color"
+                    style="background: #f8fafc; border: 2px solid #cbd5e1"
+                  ></span>
+                  Braces
+                </label>
+                <label class="tool-btn">
+                  <input type="radio" name="conditionTool" value="veneer" />
+                  <span
+                    class="tool-color"
+                    style="background: #e0f2fe; border-color: #0284c7"
+                  ></span>
+                  Veneer
+                </label>
+                <label class="tool-btn">
+                  <input type="radio" name="conditionTool" value="pontic" />
+                  <span class="tool-color" style="background: #1e293b"></span>
+                  Pontic
+                </label>
+                <label class="tool-btn">
                   <input type="radio" name="conditionTool" value="endo" />
                   <span
                     class="tool-color"
@@ -601,7 +665,7 @@
                 </div>
               </div>
 
-              <!-- Implant Dynamic Options -->
+              <!-- IMPLANT DYNAMIC OPTIONS -->
               <div
                 id="implantSubOptions"
                 style="
@@ -638,6 +702,46 @@
                     <option value="Titanium">Titanium</option>
                     <option value="Zirconia">Zirconia</option>
                     <option value="Titanium Alloy">Titanium Alloy</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- BRACE DYNAMIC OPTIONS -->
+              <div
+                id="braceSubOptions"
+                style="
+                  display: none;
+                  margin-bottom: 20px;
+                  padding: 12px;
+                  background: #f8fafc;
+                  border-radius: 6px;
+                  border: 1px solid #cbd5e1;
+                "
+              >
+                <div
+                  style="
+                    font-size: 11px;
+                    font-weight: bold;
+                    color: #334155;
+                    margin-bottom: 10px;
+                    text-transform: uppercase;
+                  "
+                >
+                  Brace Options
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 12px;
+                    color: #444;
+                  "
+                >
+                  <strong>Type:</strong>
+                  <select id="braceTypeSel" class="custom-select">
+                    <option value="standard">Standard Bracket</option>
+                    <option value="rubber">With Rubber Bands</option>
                   </select>
                 </div>
               </div>
@@ -974,73 +1078,10 @@
                   Treated/Fill
                 </label>
                 <label class="tool-btn">
-                  <input type="radio" name="conditionTool" value="pfm" />
-                  <span
-                    class="tool-color"
-                    style="background: #f1f5f9; border: 2px solid #94a3b8"
-                  ></span>
-                  PFM Crown
-                </label>
-                <label class="tool-btn">
-                  <input type="radio" name="conditionTool" value="veneer" />
-                  <span
-                    class="tool-color"
-                    style="background: #e0f2fe; border-color: #0284c7"
-                  ></span>
-                  Veneer
-                </label>
-                <label class="tool-btn">
-                  <input type="radio" name="conditionTool" value="pontic" />
-                  <span class="tool-color" style="background: #1e293b"></span>
-                  Pontic
-                </label>
-                <label class="tool-btn">
                   <input type="radio" name="conditionTool" value="healthy" />
                   <span class="tool-color" style="background: #e3ddc7"></span>
                   Clear/Healthy
                 </label>
-              </div>
-
-              <!-- PFM Dynamic Details -->
-              <div
-                id="pfmSubOptions"
-                style="
-                  display: none;
-                  margin-bottom: 20px;
-                  padding: 12px;
-                  background: #f8fafc;
-                  border-radius: 6px;
-                  border: 1px solid #cbd5e1;
-                "
-              >
-                <div
-                  style="
-                    font-size: 11px;
-                    font-weight: bold;
-                    color: #334155;
-                    margin-bottom: 10px;
-                    text-transform: uppercase;
-                  "
-                >
-                  PFM Material Options
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    font-size: 12px;
-                    color: #444;
-                  "
-                >
-                  <strong>Material:</strong>
-                  <select id="pfmMaterialSel" class="custom-select">
-                    <option value="Zirconium">Zirconium</option>
-                    <option value="Base Metal">Base Metal</option>
-                    <option value="Noble Metal">Noble Metal</option>
-                    <option value="High Noble">High Noble</option>
-                  </select>
-                </div>
               </div>
 
               <!-- Restoration Dynamic Details -->
@@ -1105,7 +1146,9 @@
                       </option>
                       <option value="Temporary">Temporary</option>
                       <option value="Hall">Hall</option>
-                      <option value="PFM">PFM</option>
+                      <option value="PFM">PFM (Standard)</option>
+                      <option value="PFM - Zirconia">PFM - Zirconia</option>
+                      <option value="PFM - Metal">PFM - Base Metal</option>
                     </select>
                   </div>
                   <div
@@ -1218,9 +1261,9 @@
             <div class="legend-item">
               <span
                 class="legend-color"
-                style="background: #f1f5f9; border: 2px solid #94a3b8"
+                style="background: #f8fafc; border: 2px solid #cbd5e1"
               ></span>
-              <span>PFM Crown</span>
+              <span>Braces</span>
             </div>
             <div class="legend-item">
               <span
@@ -1348,7 +1391,6 @@
       </div>
     </div>
 
-    <!-- Ensure your script matches what we generated below -->
     <script src="main.js"></script>
   </body>
 </html>

@@ -38,8 +38,11 @@ const allStatuses = [
   "to-be-extracted",
   "pontic-root",
   "veneer",
-  "implant", // Added Implant
-  "pfm", // Added PFM
+  "implant",
+  "brace",
+  "pfm",
+  "pfm-zirconia",
+  "pfm-metal",
   "endo",
   "eruption",
   "treated",
@@ -153,6 +156,11 @@ document.querySelectorAll('input[name="conditionTool"]').forEach((radio) => {
     if (implantOpts)
       implantOpts.style.display =
         currentActiveTool === "implant" ? "block" : "none";
+
+    const braceOpts = document.getElementById("braceSubOptions");
+    if (braceOpts)
+      braceOpts.style.display =
+        currentActiveTool === "brace" ? "block" : "none";
 
     // Show decay details button if decay is selected
     const decayOpts = document.getElementById("decaySubOptions");
@@ -432,7 +440,11 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
     badgeClass = "treated";
     friendlyToolName = `Probing <div style="font-size: 10.5px; font-weight: normal; margin-top: 4px; color: #333; line-height: 1.3;">${extraNote}</div>`;
     backendDetails = { probingUpdate: extraNote };
-  } else if (extraNote === "Applied" || extraNote === "Removed") {
+  } else if (
+    extraNote === "Applied" ||
+    extraNote === "Removed" ||
+    extraNote === "All Removed"
+  ) {
     friendlyToolName += ` <div style="font-size: 10.5px; font-weight: normal; margin-top: 4px; color: #333; line-height: 1.3;">${extraNote}</div>`;
     backendDetails = { status: extraNote };
   }
@@ -468,6 +480,11 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
     friendlyToolName = `Implant <div style="font-size: 10.5px; font-weight: normal; margin-top: 4px; color: #475569; line-height: 1.3;">Metal: ${mat}</div>`;
   }
 
+  // Brace specific logic
+  if (toolKey === "brace") {
+    friendlyToolName = `Brace <div style="font-size: 10.5px; font-weight: normal; margin-top: 4px; color: #475569; line-height: 1.3;">${extraNote}</div>`;
+  }
+
   // Wear specific logic
   if (toolKey === "wear") {
     const type = document.querySelector('input[name="wearType"]:checked').value;
@@ -482,7 +499,7 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
     backendDetails = { color: color };
   }
 
-  // Restoration (Treated/PFM) specific logic
+  // Restoration specific logic
   if (toolKey === "treated") {
     const restOpts = document.getElementById("restorationSubOptions");
     if (restOpts && restOpts.style.display === "block") {
@@ -498,9 +515,14 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
         detail: det,
       };
 
-      if (mat === "PFM") {
+      if (mat.includes("PFM")) {
         friendlyToolName = `PFM Crown <div style="font-size: 10.5px; font-weight: normal; margin-top: 4px; color: #334155; line-height: 1.3;">Type: ${type}<br>Mat: ${mat} | Qual: ${qual}<br>Det: ${det}</div>`;
-        badgeClass = "pfm";
+        badgeClass =
+          mat === "PFM - Zirconia"
+            ? "pfm-zirconia"
+            : mat === "PFM - Metal"
+              ? "pfm-metal"
+              : "pfm";
       } else {
         friendlyToolName = `Restoration <div style="font-size: 10.5px; font-weight: normal; margin-top: 4px; color: #3333bb; line-height: 1.3;">Type: ${type}<br>Mat: ${mat} | Qual: ${qual}<br>Det: ${det}</div>`;
       }
@@ -509,12 +531,16 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
 
   // 1. SYNC TO BACKEND STRUCTURE
   window.dentalRecord.lastUpdated = now.toISOString();
-  window.dentalRecord.teeth[toothFDI].history.push({
-    date: now.toISOString(),
-    section: sectionName,
-    condition: toolKey,
-    details: backendDetails,
-  });
+
+  // Safety check, handle string labels for full arch removals
+  if (!isNaN(toothFDI)) {
+    window.dentalRecord.teeth[toothFDI].history.push({
+      date: now.toISOString(),
+      section: sectionName,
+      condition: toolKey,
+      details: backendDetails,
+    });
+  }
 
   // 2. UI LOGGING (Global)
   const mainLogHtml = `
@@ -529,17 +555,19 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
   if (logList.children.length > 8) logList.removeChild(logList.lastChild);
 
   // 3. UI LOGGING (Sidebar Specific)
-  if (!globalHistory[toothFDI]) globalHistory[toothFDI] = [];
-  const sidebarLogHtml = `
-          <strong style="color:#94a3b8; font-size: 11px;">[${timeString}]</strong> 
-          <span style="color:#334155; font-weight:500;">${sectionName}</span>: 
-          <span class="status-badge ${badgeClass}">${friendlyToolName}</span>
-        `;
-  globalHistory[toothFDI].unshift(sidebarLogHtml);
+  if (!isNaN(toothFDI)) {
+    if (!globalHistory[toothFDI]) globalHistory[toothFDI] = [];
+    const sidebarLogHtml = `
+              <strong style="color:#94a3b8; font-size: 11px;">[${timeString}]</strong> 
+              <span style="color:#334155; font-weight:500;">${sectionName}</span>: 
+              <span class="status-badge ${badgeClass}">${friendlyToolName}</span>
+            `;
+    globalHistory[toothFDI].unshift(sidebarLogHtml);
 
-  const sidebarTitle = document.getElementById("sidebarTitle");
-  if (sidebarTitle && sidebarTitle.textContent === "Tooth " + toothFDI) {
-    updateSidebarHistory(toothFDI);
+    const sidebarTitle = document.getElementById("sidebarTitle");
+    if (sidebarTitle && sidebarTitle.textContent === "Tooth " + toothFDI) {
+      updateSidebarHistory(toothFDI);
+    }
   }
 }
 
@@ -859,7 +887,9 @@ function handleConditionApplication(
       });
 
       // Visually Swap the Root Images!
-      const normalImg = tooth.querySelector(".tooth-view-item.normal img");
+      const normalImg = tooth.querySelector(
+        ".tooth-view-item.normal img:not(.brace-overlay)",
+      );
       const normalBackImg = tooth.querySelector(
         ".tooth-view-item.normal-back img",
       );
@@ -881,26 +911,161 @@ function handleConditionApplication(
     return;
   }
 
-  // 11. Apical Condition, Endo, Eruption (Ignored here since it's driven by UI button, but left for safety)
+  // 11. Brace Logic (Injects overlay image, handles auto-mirroring, chain-updates & draws wire)
+  if (tool === "brace") {
+    const braceType = document.getElementById("braceTypeSel").value; // "standard" or "rubber"
+    const currentBraceType = tooth.dataset.hasBrace; // "standard", "rubber", or empty string
+
+    const fdiStr = displayLabel.toString();
+    const quad = parseInt(fdiStr[0]);
+    const pos = parseInt(fdiStr[1]);
+    const isUpper = quad === 1 || quad === 2;
+    const archFdis = isUpper
+      ? [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
+      : [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+
+    // Double Click -> Remove ALL braces in this arch
+    if (isDoubleClick) {
+      archFdis.forEach((f) => {
+        const t = Array.from(document.querySelectorAll(".tooth")).find(
+          (el) => el.querySelector(".tooth-number").textContent == f,
+        );
+        if (t && t.dataset.hasBrace) {
+          t.dataset.hasBrace = "";
+          const bImg = t.querySelector(".brace-overlay");
+          if (bImg) bImg.style.display = "none";
+        }
+      });
+      logAction(
+        "Arch " + (isUpper ? "Upper" : "Lower"),
+        "Arch",
+        "brace",
+        "All Removed",
+      );
+    }
+    // Single Click -> Same Type -> Remove individual brace
+    else if (currentBraceType === braceType) {
+      tooth.dataset.hasBrace = "";
+      const braceImg = tooth.querySelector(".brace-overlay");
+      if (braceImg) braceImg.style.display = "none";
+      logAction(displayLabel, "Front Crown", "brace", "Removed");
+    }
+    // Single Click -> Different Type -> Update entire chain to new type
+    else if (currentBraceType && currentBraceType !== braceType) {
+      archFdis.forEach((f) => {
+        const t = Array.from(document.querySelectorAll(".tooth")).find(
+          (el) => el.querySelector(".tooth-number").textContent == f,
+        );
+        if (t && t.dataset.hasBrace) {
+          t.dataset.hasBrace = braceType;
+          const bImg = t.querySelector(".brace-overlay");
+          if (bImg) {
+            bImg.src =
+              braceType === "rubber"
+                ? "brace/brace-rubber-bands.png"
+                : "brace/brace.png";
+          }
+        }
+      });
+      const logTypeStr = braceType === "rubber" ? "Rubber Bands" : "Standard";
+      logAction(
+        "Arch " + (isUpper ? "Upper" : "Lower"),
+        "Arch",
+        "brace",
+        `Changed All to: ${logTypeStr}`,
+      );
+    }
+    // Single Click -> No Brace -> Add brace (Auto-mirror if first in arch)
+    else {
+      const currentBracesInArch = archFdis.filter((f) => {
+        const t = Array.from(document.querySelectorAll(".tooth")).find(
+          (el) => el.querySelector(".tooth-number").textContent == f,
+        );
+        return t && t.dataset.hasBrace;
+      });
+
+      let targetTeeth = [displayLabel];
+
+      if (currentBracesInArch.length === 0) {
+        const mirroredQuad =
+          quad === 1 ? 2 : quad === 2 ? 1 : quad === 3 ? 4 : 3;
+        const mirroredFdi = parseInt(`${mirroredQuad}${pos}`);
+        const idx1 = archFdis.indexOf(displayLabel);
+        const idx2 = archFdis.indexOf(mirroredFdi);
+        const minIdx = Math.min(idx1, idx2);
+        const maxIdx = Math.max(idx1, idx2);
+        targetTeeth = archFdis.slice(minIdx, maxIdx + 1);
+      }
+
+      targetTeeth.forEach((fdi) => {
+        const targetTooth = Array.from(
+          document.querySelectorAll(".tooth"),
+        ).find((el) => el.querySelector(".tooth-number").textContent == fdi);
+        if (targetTooth) {
+          targetTooth.dataset.hasBrace = braceType;
+          let bImg = targetTooth.querySelector(".brace-overlay");
+          if (bImg) {
+            bImg.src =
+              braceType === "rubber"
+                ? "brace/brace-rubber-bands.png"
+                : "brace/brace.png";
+            bImg.style.display = "block";
+          }
+        }
+      });
+
+      const logTypeStr = braceType === "rubber" ? "Rubber Bands" : "Standard";
+      if (targetTeeth.length > 1) {
+        logAction(
+          `${displayLabel} to ${targetTeeth[targetTeeth.length - 1]}`,
+          "Arch",
+          "brace",
+          `Auto-Linked: ${logTypeStr}`,
+        );
+      } else {
+        logAction(
+          displayLabel,
+          "Front Crown",
+          "brace",
+          `Applied: ${logTypeStr}`,
+        );
+      }
+    }
+
+    if (window.animateBraceWires) window.animateBraceWires();
+    return;
+  }
+
+  // 12. Apical Condition, Endo, Eruption (Ignored here since it's driven by UI button, but left for safety)
   if (tool === "apical" || tool === "endo" || tool === "eruption") return;
 
-  // 12. Clearing / Healthy logic
+  // 13. Clearing / Healthy logic
   if (appliedClass === "healthy") {
     if (topOverlay)
       topOverlay.classList.remove(
         "fracture-crown-vertical",
         "fracture-crown-horizontal",
       );
+
+    // Clear Braces on healthy selection
+    tooth.dataset.hasBrace = "";
+    const braceImg = tooth.querySelector(".brace-overlay");
+    if (braceImg) braceImg.style.display = "none";
+    if (window.animateBraceWires) window.animateBraceWires();
   }
 
-  // 13. Standard Specific Section application
+  // 14. Standard Specific Section application
   let finalClassToAdd = appliedClass;
 
-  // Intercept the 'treated' class to see if we should map it to PFM Crown instead!
+  // Intercept the 'treated' class to map it to specific PFM styles
   if (appliedClass === "treated") {
     const mat = document.getElementById("restMatSel").value;
     if (mat === "PFM") {
       finalClassToAdd = "pfm";
+    } else if (mat === "PFM - Zirconia") {
+      finalClassToAdd = "pfm-zirconia";
+    } else if (mat === "PFM - Metal") {
+      finalClassToAdd = "pfm-metal";
     }
   }
 
@@ -930,6 +1095,95 @@ function handleConditionApplication(
   }
 }
 
+// --- DYNAMIC BRACE WIRE DRAWING LOGIC ---
+window.redrawBraceWires = function () {
+  ["upper", "lower"].forEach((archStr) => {
+    const svg = document.getElementById(`${archStr}BraceWires`);
+    if (!svg) return;
+    svg.innerHTML = ""; // Clear previous wires
+
+    const isUpper = archStr === "upper";
+    const archFdis = isUpper
+      ? [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
+      : [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+
+    let previousNode = null;
+    const archContentRect = svg.parentElement.getBoundingClientRect();
+
+    archFdis.forEach((fdi) => {
+      const toothEls = document.querySelectorAll(".tooth");
+      const toothWrapper = Array.from(toothEls).find(
+        (t) => t.querySelector(".tooth-number").textContent == fdi,
+      );
+
+      if (toothWrapper && toothWrapper.dataset.hasBrace) {
+        const braceImg = toothWrapper.querySelector(".brace-overlay");
+        if (braceImg && braceImg.style.display !== "none") {
+          const rect = braceImg.getBoundingClientRect();
+
+          // Calculate center point exactly at the brace overlay relative to the arch-content wrapper
+          const centerX = rect.left - archContentRect.left + rect.width / 2;
+          const centerY = rect.top - archContentRect.top + rect.height / 2;
+
+          // Clip the wire right at the visual boundary of the bracket (approx 40% of the image width)
+          const braceRadius = rect.width * 0.4;
+
+          if (previousNode) {
+            const dx = centerX - previousNode.centerX;
+            const dy = centerY - previousNode.centerY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+
+            // Only draw line if there is distance, clipping the edges so it never overlaps the bracket
+            if (length > 0) {
+              const ratio1 = previousNode.radius / length;
+              const ratio2 = braceRadius / length;
+
+              const x1 = previousNode.centerX + dx * ratio1;
+              const y1 = previousNode.centerY + dy * ratio1;
+              const x2 = centerX - dx * ratio2;
+              const y2 = centerY - dy * ratio2;
+
+              // Draw the SVG wire between consecutive braced teeth
+              const line = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line",
+              );
+              line.setAttribute("x1", x1);
+              line.setAttribute("y1", y1);
+              line.setAttribute("x2", x2);
+              line.setAttribute("y2", y2);
+              line.setAttribute("stroke", "#E1E5F4");
+              line.setAttribute("stroke-width", "5");
+              line.setAttribute("stroke-linecap", "round");
+              svg.appendChild(line);
+            }
+          }
+
+          previousNode = { centerX, centerY, radius: braceRadius };
+        }
+      }
+    });
+  });
+};
+
+// Animation loop tracker to map wires natively while tooth is scaling up/down CSS transitions!
+window.animateBraceWires = function () {
+  let start = performance.now();
+  function step(timestamp) {
+    if (window.redrawBraceWires) window.redrawBraceWires();
+    // Matches the length of the CSS transition (0.3s)
+    if (timestamp - start < 350) {
+      requestAnimationFrame(step);
+    }
+  }
+  requestAnimationFrame(step);
+};
+
+// Redraw wires if window is resized to keep them aligned
+window.addEventListener("resize", () => {
+  if (window.redrawBraceWires) window.redrawBraceWires();
+});
+
 // --- FOCUS AND SIDEBAR LOGIC ---
 function closeSidebar() {
   const odontogram = document.querySelector(".odontogram");
@@ -943,6 +1197,8 @@ function closeSidebar() {
   sidebar.classList.remove("show");
   mainContent.classList.remove("sidebar-open-left", "sidebar-open-right");
   currentFocusedToothFDI = null;
+
+  if (window.animateBraceWires) window.animateBraceWires();
 }
 
 document
@@ -988,6 +1244,8 @@ function openSidebar(fdi, toothElement, isolateCallback) {
   loadToothState(fdi, toothElement); // Load notes + Probing state + dynamic Restoration dropdowns
   document.getElementById("isolateToothBtn").onclick = isolateCallback;
   sidebar.classList.add("show");
+
+  if (window.animateBraceWires) window.animateBraceWires();
 }
 
 // --- TOOTH GENERATION LOGIC ---
@@ -997,6 +1255,9 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
 
   const fdiQuadrantDigit = displayLabel.toString().charAt(0);
   tooth.classList.add("q" + fdiQuadrantDigit);
+
+  // Track Brace status visually inside DOM dataset
+  tooth.dataset.hasBrace = "";
 
   if (
     [
@@ -1138,6 +1399,12 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
   // NOTE: Changed to native .png mapping
   normalImg.src = "normal-img/" + displayLabel + ".png";
   normalView.appendChild(normalImg);
+
+  // BRACES OVERLAY INSTANCE
+  const braceImg = document.createElement("img");
+  braceImg.className = "brace-overlay";
+  braceImg.alt = "Braces on Tooth " + displayLabel;
+  normalView.appendChild(braceImg);
 
   const normalOverlay = document.createElement("div");
   normalOverlay.className = "section-overlay normal-overlay";
@@ -1361,11 +1628,12 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
     // Remove main-content margin adjustments (not needed in single view)
     mainContent.classList.remove("sidebar-open-left", "sidebar-open-right");
 
-    document.getElementById("isolateToothBtn").style.display = "none"; // Hide isolate button in single view
+    document.getElementById("isolateToothBtn").style.display = "none";
+
+    if (window.animateBraceWires) window.animateBraceWires();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Open sidebar ONLY if tooth is not focused. Fixes "lacky" applying.
   tooth.addEventListener("click", (e) => {
     if (!tooth.classList.contains("focused-tooth")) {
       e.stopPropagation();
@@ -1459,8 +1727,10 @@ function closeEditorScreen() {
   document.getElementById("singleToothView").style.display = "none";
   document.getElementById("mainView").style.display = "block";
   document.getElementById("isolateToothBtn").style.display = "block";
-  // Close the sidebar cleanly when returning to chart
   closeSidebar();
+
+  if (window.animateBraceWires) window.animateBraceWires();
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -1489,6 +1759,9 @@ viewButtons.forEach((button) => {
       upperArch.classList.remove("hidden");
       lowerArch.classList.remove("hidden");
     }
+
+    // Wire cleanup/redraw based on visible arches
+    if (window.redrawBraceWires) window.redrawBraceWires();
   });
 });
 
@@ -1587,9 +1860,35 @@ closeSummaryModalBtn.addEventListener("click", () => {
 });
 
 exportJsonBtn.addEventListener("click", () => {
+  // Extract current image views and brace states for each tooth to export
+  fdiStandardList.forEach((fdi) => {
+    const toothEls = document.querySelectorAll(".tooth");
+    const targetTooth = Array.from(toothEls).find(
+      (t) => t.querySelector(".tooth-number").textContent == fdi,
+    );
+
+    if (targetTooth) {
+      const normalImg = targetTooth.querySelector(
+        ".tooth-view-item.normal img:not(.brace-overlay)",
+      );
+      const topImg = targetTooth.querySelector(".tooth-view-item.top img");
+      const backImg = targetTooth.querySelector(
+        ".tooth-view-item.normal-back img",
+      );
+      const hasBrace = targetTooth.dataset.hasBrace;
+
+      window.dentalRecord.teeth[fdi].currentImages = {
+        normalView: normalImg ? normalImg.getAttribute("src") : null,
+        topView: topImg ? topImg.getAttribute("src") : null,
+        backView: backImg ? backImg.getAttribute("src") : null,
+        hasBrace: hasBrace ? hasBrace : false,
+      };
+    }
+  });
+
   console.log("--- EXPORTED DENTAL RECORD JSON ---");
   console.log(JSON.stringify(window.dentalRecord, null, 2));
   alert(
-    "JSON Data successfully exported to the Browser Console! Press F12 to view the structured data ready for your backend.",
+    "JSON Data successfully exported to the Browser Console! Image sources & Brace status are now included in the object. Press F12 to view.",
   );
 });
