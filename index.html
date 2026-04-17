@@ -45,6 +45,19 @@
         z-index: 1; /* Sits tightly behind the brace but above the tooth */
         overflow: visible;
       }
+
+      /* Fix for html2canvas ignoring object-fit and stretching images (Chubby Fix) */
+      .pdf-exporting .tooth-view-item img:not(.brace-overlay) {
+        width: auto !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        margin: 0 auto;
+        object-fit: fill !important;
+      }
+      .pdf-exporting .section-overlay svg {
+        width: 100% !important;
+        height: 100% !important;
+      }
     </style>
   </head>
 

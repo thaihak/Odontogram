@@ -265,13 +265,16 @@ h1 {
   font-size: 14px;
 }
 
+/* REPLACED `margin-inline` with explicit left/right margins. 
+   html2canvas does not reliably parse modern logical properties, which caused the spacing bugs */
 .tooth {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 65px;
+  width: 60px; /* Increased for tighter front teeth */
+  height: auto;
+  margin-left: 1px;
+  margin-right: 1px;
   position: relative;
   z-index: 1;
+
   user-select: none;
   transition:
     transform 0.3s ease,
@@ -283,14 +286,16 @@ h1 {
 }
 
 .tooth.tight {
-  width: 50px;
+  width: 50px; /* Increased for tighter front teeth */
+  height: auto;
   margin-left: -1px;
+  margin-right: -1px;
 }
 
 .tooth-views {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
   align-items: center;
 }
 
@@ -305,15 +310,16 @@ h1 {
   pointer-events: none;
 }
 
+/* FIX: Increased height so 'object-fit: contain' lets the tooth grow proportionally */
 .tooth-view-item.normal {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 110px;
   position: relative;
 }
 
 .tooth-view-item.normal-back {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 110px;
   position: relative;
 }
 
@@ -322,19 +328,19 @@ h1 {
 }
 
 .tooth-view-item.top {
-  width: 85px;
+  width: 100%;
   height: 50px;
   position: relative;
 }
 
-/* Scale down top views for narrower teeth to prevent overlap */
+/* Top views naturally adapt to the 100% width of their tighter/normal containers */
 .tooth.type-normal .tooth-view-item.top {
-  width: 45px;
-  height: 50px;
+  width: 90%;
+  height: 50px; /* Slightly shorter for front teeth to maintain proportion */
 }
 
 .tooth.type-premolar .tooth-view-item.top {
-  width: 65px;
+  width: 100%;
   height: 50px;
 }
 
@@ -1334,7 +1340,6 @@ h1 {
     transform: translateY(0);
   }
 }
-/* Add these new classes anywhere inside your styles.css */
 
 /* Implant Structure - Making the SVG transparent because the underlying image (.png) will be swapped to show the metal root */
 .section-overlay path.implant {
@@ -1343,60 +1348,7 @@ h1 {
 }
 
 .section-overlay path.implant:hover {
-  stroke: rgba(
-    71,
-    85,
-    105,
-    0.3
-  ) !important; /* faint border on hover just to show it's clickable */
-}
-
-/* PFM Crown - Default Standard Clean blue-ish grey fill */
-.section-overlay path.pfm {
-  fill: #f1f5f9 !important;
-  stroke: #64748b !important;
-  stroke-width: 1.5px !important;
-}
-
-.section-overlay path.pfm:hover {
-  fill: #e2e8f0 !important;
-}
-
-/* PFM Crown - Zirconia (Brighter, clean, marked with dashed border) */
-.section-overlay path.pfm-zirconia {
-  fill: #ffffff !important;
-  stroke: #94a3b8 !important;
-  stroke-width: 1.5px !important;
-  stroke-dasharray: 3, 2 !important;
-}
-
-.section-overlay path.pfm-zirconia:hover {
-  fill: #f8fafc !important;
-}
-
-/* PFM Crown - Base Metal (Darker grey, solid thick border) */
-.section-overlay path.pfm-metal {
-  fill: #cbd5e1 !important;
-  stroke: #475569 !important;
-  stroke-width: 2px !important;
-}
-
-.section-overlay path.pfm-metal:hover {
-  fill: #94a3b8 !important;
-}
-/* Implant Structure - Making the SVG transparent because the underlying image (.png) will be swapped to show the metal root */
-.section-overlay path.implant {
-  fill: transparent !important;
-  stroke: transparent !important;
-}
-
-.section-overlay path.implant:hover {
-  stroke: rgba(
-    71,
-    85,
-    105,
-    0.3
-  ) !important; /* faint border on hover just to show it's clickable */
+  stroke: rgba(71, 85, 105, 0.3) !important;
 }
 
 /* PFM Crown - Default Standard Clean blue-ish grey fill */
@@ -1433,40 +1385,39 @@ h1 {
   fill: #94a3b8 !important;
 }
 
+/* --- Clean Unified Brace CSS overrides integrated to fix overlap bugs --- */
 .tooth-view-item img.brace-overlay {
-  position: absolute !important;
-  width: 30% !important; /* Makes it smaller, bypassing the 100% generic rule */
-  height: auto !important; /* Prevents the image from stretching vertically */
-  left: 50% !important; /* Center horizontally */
-  pointer-events: none !important; /* Lets clicks pass through to the SVG sections below */
-  z-index: 5 !important; /* Sits above the tooth PNG but below the clickable SVG paths */
-  display: none; /* Hidden by default */
-  object-fit: contain !important;
+  position: absolute;
+  width: 55%;
+  height: auto;
+  left: 50%;
+  pointer-events: none;
+  z-index: 5;
+  display: none;
+  object-fit: contain;
 }
 
-/* Upper teeth: Root is top, crown is bottom. Place brace at ~87% down */
+/* Upper teeth: Root is top, crown is bottom. Place brace at ~80% down */
 .tooth.upper .brace-overlay {
-  top: 87% !important;
-  transform: translate(-50%, -50%) !important; /* Keeps it perfectly centered */
+  top: 80%;
+  transform: translate(-50%, -50%);
 }
 
-/* Lower teeth: Crown is top, root is bottom. Place brace at ~13% down */
+/* Lower teeth: Crown is top, root is bottom. Place brace at ~20% down */
 .tooth.lower .brace-overlay {
-  top: 13% !important;
-  transform: translate(-50%, -50%) !important; /* Keeps it perfectly centered */
+  top: 20%;
+  transform: translate(-50%, -50%);
 }
 
 /* Dynamic Brace SVG Wire Container */
 .brace-wires {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  pointer-events: none !important;
-  /* Force it above everything, including focused teeth (which have z-index 50) */
-  z-index: 2 !important;
-  overflow: visible !important;
-  /* Add slight transparency so the brace bracket details underneath remain visible! */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 6; /* Ensures wires are fully above the brace overlays */
+  overflow: visible;
   opacity: 0.85;
 }

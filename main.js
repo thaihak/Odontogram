@@ -483,6 +483,7 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
   // Brace specific logic
   if (toolKey === "brace") {
     friendlyToolName = `Brace <div style="font-size: 10.5px; font-weight: normal; margin-top: 4px; color: #475569; line-height: 1.3;">${extraNote}</div>`;
+    backendDetails = { status: extraNote }; // Ensure brace states properly save to JSON history
   }
 
   // Wear specific logic
@@ -532,7 +533,7 @@ function logAction(toothFDI, sectionName, toolKey, extraNote = "") {
   // 1. SYNC TO BACKEND STRUCTURE
   window.dentalRecord.lastUpdated = now.toISOString();
 
-  // Safety check, handle string labels for full arch removals
+  // Safety check, handles only precise individual FDI codes to prevent bad history mapping
   if (!isNaN(toothFDI)) {
     window.dentalRecord.teeth[toothFDI].history.push({
       date: now.toISOString(),
@@ -934,14 +935,10 @@ function handleConditionApplication(
           t.dataset.hasBrace = "";
           const bImg = t.querySelector(".brace-overlay");
           if (bImg) bImg.style.display = "none";
+          // Log to each individual tooth
+          logAction(f, "Front Crown", "brace", "Removed");
         }
       });
-      logAction(
-        "Arch " + (isUpper ? "Upper" : "Lower"),
-        "Arch",
-        "brace",
-        "All Removed",
-      );
     }
     // Single Click -> Same Type -> Remove individual brace
     else if (currentBraceType === braceType) {
@@ -952,6 +949,7 @@ function handleConditionApplication(
     }
     // Single Click -> Different Type -> Update entire chain to new type
     else if (currentBraceType && currentBraceType !== braceType) {
+      const logTypeStr = braceType === "rubber" ? "Rubber Bands" : "Standard";
       archFdis.forEach((f) => {
         const t = Array.from(document.querySelectorAll(".tooth")).find(
           (el) => el.querySelector(".tooth-number").textContent == f,
@@ -965,15 +963,10 @@ function handleConditionApplication(
                 ? "brace/brace-rubber-bands.png"
                 : "brace/brace.png";
           }
+          // Log to each individual tooth
+          logAction(f, "Front Crown", "brace", `Changed to: ${logTypeStr}`);
         }
       });
-      const logTypeStr = braceType === "rubber" ? "Rubber Bands" : "Standard";
-      logAction(
-        "Arch " + (isUpper ? "Upper" : "Lower"),
-        "Arch",
-        "brace",
-        `Changed All to: ${logTypeStr}`,
-      );
     }
     // Single Click -> No Brace -> Add brace (Auto-mirror if first in arch)
     else {
@@ -997,6 +990,7 @@ function handleConditionApplication(
         targetTeeth = archFdis.slice(minIdx, maxIdx + 1);
       }
 
+      const logTypeStr = braceType === "rubber" ? "Rubber Bands" : "Standard";
       targetTeeth.forEach((fdi) => {
         const targetTooth = Array.from(
           document.querySelectorAll(".tooth"),
@@ -1011,25 +1005,10 @@ function handleConditionApplication(
                 : "brace/brace.png";
             bImg.style.display = "block";
           }
+          // Log to each individual tooth seamlessly
+          logAction(fdi, "Front Crown", "brace", `Applied: ${logTypeStr}`);
         }
       });
-
-      const logTypeStr = braceType === "rubber" ? "Rubber Bands" : "Standard";
-      if (targetTeeth.length > 1) {
-        logAction(
-          `${displayLabel} to ${targetTeeth[targetTeeth.length - 1]}`,
-          "Arch",
-          "brace",
-          `Auto-Linked: ${logTypeStr}`,
-        );
-      } else {
-        logAction(
-          displayLabel,
-          "Front Crown",
-          "brace",
-          `Applied: ${logTypeStr}`,
-        );
-      }
     }
 
     if (window.animateBraceWires) window.animateBraceWires();
@@ -1048,9 +1027,13 @@ function handleConditionApplication(
       );
 
     // Clear Braces on healthy selection
-    tooth.dataset.hasBrace = "";
-    const braceImg = tooth.querySelector(".brace-overlay");
-    if (braceImg) braceImg.style.display = "none";
+    if (tooth.dataset.hasBrace) {
+      tooth.dataset.hasBrace = "";
+      const braceImg = tooth.querySelector(".brace-overlay");
+      if (braceImg) braceImg.style.display = "none";
+      logAction(displayLabel, "Front Crown", "brace", "Removed");
+    }
+
     if (window.animateBraceWires) window.animateBraceWires();
   }
 
@@ -1772,6 +1755,11 @@ const closeSummaryModalBtn = document.getElementById("closeSummaryModalBtn");
 const summaryModalBody = document.getElementById("summaryModalBody");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 
+// Update Export Button Text Natively
+if (exportJsonBtn) {
+  exportJsonBtn.textContent = "Export Chart & Summary as PDF";
+}
+
 function renderSummary() {
   summaryModalBody.innerHTML = "";
   const table = document.createElement("table");
@@ -1859,7 +1847,7 @@ closeSummaryModalBtn.addEventListener("click", () => {
   summaryModal.style.display = "none";
 });
 
-exportJsonBtn.addEventListener("click", () => {
+exportJsonBtn.addEventListener("click", async () => {
   // Extract current image views and brace states for each tooth to export
   fdiStandardList.forEach((fdi) => {
     const toothEls = document.querySelectorAll(".tooth");
@@ -1886,9 +1874,146 @@ exportJsonBtn.addEventListener("click", () => {
     }
   });
 
-  console.log("--- EXPORTED DENTAL RECORD JSON ---");
-  console.log(JSON.stringify(window.dentalRecord, null, 2));
-  alert(
-    "JSON Data successfully exported to the Browser Console! Image sources & Brace status are now included in the object. Press F12 to view.",
-  );
+  // --- NEW PDF EXPORT LOGIC ---
+  const originalText = exportJsonBtn.textContent;
+  exportJsonBtn.textContent = "Generating PDF...";
+  exportJsonBtn.style.pointerEvents = "none";
+  exportJsonBtn.style.opacity = "0.7";
+
+  try {
+    // Dynamically load html2canvas
+    if (typeof window.html2canvas === "undefined") {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    // Dynamically load jsPDF
+    if (typeof window.jspdf === "undefined") {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    const mainView = document.getElementById("mainView");
+    const summaryBody = document.getElementById("summaryModalBody");
+    const summaryTable = summaryBody.querySelector(".summary-table");
+    const emptyState = summaryBody.querySelector(".summary-empty-state");
+
+    // Hide UI controls temporarily
+    const controls = document.querySelector(".controls");
+    const originalControlsDisplay = controls.style.display;
+    controls.style.display = "none";
+
+    // 1. SCROLL TO TOP to prevent rendering offsets when exporting
+    window.scrollTo(0, 0);
+
+    // 2. LOCK CONTAINER WIDTH to enforce perfect aspect ratios on the teeth images and SVG paths
+    // Fix: Instead of forcing 1200px (which stretched them on small screens), we lock to the exact current width!
+    const appContainer = document.getElementById("appContainer");
+    const originalContainerWidth = appContainer.style.width;
+    const originalContainerMaxWidth = appContainer.style.maxWidth;
+
+    const currentWidth = window.getComputedStyle(appContainer).width;
+    appContainer.style.width = currentWidth;
+    appContainer.style.maxWidth = currentWidth;
+
+    // Apply PDF exporting class to safeguard image ratios
+    mainView.classList.add("pdf-exporting");
+
+    // Expand hidden arches
+    const upperArch = document.querySelector(".arch:has(#upperLeft)");
+    const lowerArch = document.querySelector(".arch:has(#lowerRight)");
+    const originalUpperHidden = upperArch.classList.contains("hidden");
+    const originalLowerHidden = lowerArch.classList.contains("hidden");
+    upperArch.classList.remove("hidden");
+    lowerArch.classList.remove("hidden");
+
+    // Create wrapper
+    const exportSummaryWrapper = document.createElement("div");
+    exportSummaryWrapper.id = "tempExportSummary";
+    exportSummaryWrapper.style.marginTop = "40px";
+    exportSummaryWrapper.style.padding = "20px";
+    exportSummaryWrapper.style.backgroundColor = "white";
+    exportSummaryWrapper.style.borderRadius = "8px";
+
+    const summaryTitle = document.createElement("h2");
+    summaryTitle.textContent = "Treatment Summary List";
+    summaryTitle.style.borderBottom = "2px solid #ccc";
+    summaryTitle.style.paddingBottom = "10px";
+    summaryTitle.style.marginBottom = "20px";
+    summaryTitle.style.color = "#333";
+    exportSummaryWrapper.appendChild(summaryTitle);
+
+    if (summaryTable) exportSummaryWrapper.appendChild(summaryTable);
+    if (emptyState) exportSummaryWrapper.appendChild(emptyState);
+
+    mainView.appendChild(exportSummaryWrapper);
+
+    // Allow layout to settle and redraw wires accurately on the container
+    if (window.redrawBraceWires) window.redrawBraceWires();
+    await new Promise((r) => setTimeout(r, 600)); // Slightly longer timeout to guarantee reflow completion
+
+    // Generate Canvas Image
+    const canvas = await window.html2canvas(mainView, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff", // Changed to pure white so the PDF looks cleaner
+      logging: false,
+    });
+
+    // Revert DOM back to user's interactive state
+    mainView.classList.remove("pdf-exporting");
+    if (summaryTable) summaryBody.appendChild(summaryTable);
+    if (emptyState) summaryBody.appendChild(emptyState);
+    mainView.removeChild(exportSummaryWrapper);
+    controls.style.display = originalControlsDisplay;
+
+    appContainer.style.width = originalContainerWidth;
+    appContainer.style.maxWidth = originalContainerMaxWidth;
+
+    if (originalUpperHidden) upperArch.classList.add("hidden");
+    if (originalLowerHidden) lowerArch.classList.add("hidden");
+
+    if (window.redrawBraceWires) window.redrawBraceWires();
+
+    // Generate and Download PDF
+    const { jsPDF } = window.jspdf;
+    const imgData = canvas.toDataURL("image/png");
+
+    // Create A4 portrait PDF
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+
+    // Fit to page width with 10mm margin
+    const margin = 10;
+    const printWidth = pdfWidth - margin * 2;
+    const printHeight = (canvas.height * printWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", margin, margin, printWidth, printHeight);
+    pdf.save(`Dental_Chart_${new Date().toISOString().split("T")[0]}.pdf`);
+
+    // Fallback: Still log JSON to console as requested previously
+    console.log("--- EXPORTED DENTAL RECORD JSON ---");
+    console.log(JSON.stringify(window.dentalRecord, null, 2));
+  } catch (err) {
+    console.error("PDF Export Error:", err);
+    alert(
+      "Failed to generate export PDF. Make sure you are connected to the internet to load the export libraries.",
+    );
+  } finally {
+    exportJsonBtn.textContent = originalText;
+    exportJsonBtn.style.pointerEvents = "auto";
+    exportJsonBtn.style.opacity = "1";
+  }
 });
