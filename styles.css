@@ -1399,7 +1399,7 @@ h1 {
 
 /* Upper teeth: Root is top, crown is bottom. Place brace at ~80% down */
 .tooth.upper .brace-overlay {
-  top: 80%;
+  top: 82%;
   transform: translate(-50%, -50%);
 }
 
@@ -1420,4 +1420,35 @@ h1 {
   z-index: 6; /* Ensures wires are fully above the brace overlays */
   overflow: visible;
   opacity: 0.85;
+}
+.pdf-exporting .section-overlay svg {
+  transform: none !important;
+  vector-effect: non-scaling-stroke;
+}
+
+/* 2. Apply the mirroring directly to the HTML DIV containers */
+.pdf-exporting .section-overlay {
+  transform-origin: center center !important;
+}
+
+/* Ensure that when pdf-exporting class is active, we mirror the container div */
+.pdf-exporting .tooth.q2 .section-overlay {
+  transform: scaleX(-1) !important;
+}
+.pdf-exporting .tooth.q3 .section-overlay {
+  transform: scale(-1, -1) !important;
+}
+.pdf-exporting .tooth.q4 .section-overlay {
+  transform: scaleY(-1) !important;
+}
+
+/* Back View Specific Fixes for PDF */
+.pdf-exporting .tooth.q1 .normal-back-overlay {
+  transform: scaleY(-1) !important;
+}
+.pdf-exporting .tooth.q2 .normal-back-overlay {
+  transform: scale(-1, -1) !important;
+}
+.pdf-exporting .tooth.q3 .normal-back-overlay {
+  transform: scaleX(-1) !important;
 }

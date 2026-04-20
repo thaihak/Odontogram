@@ -687,16 +687,18 @@ function handleConditionApplication(
     }
 
     if (pathsToApply.length > 0) {
-      let isApplied = false;
-      pathsToApply.forEach((p) => {
-        if (p.classList.contains("wear")) isApplied = true;
-      });
+      let isAnyApplied = pathsToApply.some((p) => p.classList.contains("wear"));
 
       pathsToApply.forEach((p) => {
         p.classList.remove(...allStatuses);
-        if (!isApplied) p.classList.add("wear");
+        if (!isAnyApplied) p.classList.add("wear");
       });
-      logAction(displayLabel, `${wearSurface} Crown & Top`, "wear");
+      logAction(
+        displayLabel,
+        `${wearSurface} Crown & Top`,
+        "wear",
+        isAnyApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -704,20 +706,25 @@ function handleConditionApplication(
   // 2. Decay Override - Check if Whole Crown extent was selected
   if (tool === "decay") {
     const decayExtent = document.getElementById("decayExtentSel").value;
-    if (decayExtent === "Crown") {
+    if (decayExtent === "Crown" && !isDoubleClick) {
       const allCrownPaths = Array.from(tooth.querySelectorAll("path")).filter(
         isCrownPath,
       );
       if (allCrownPaths.length > 0) {
-        let isApplied = false;
-        allCrownPaths.forEach((p) => {
-          if (p.classList.contains("decay")) isApplied = true;
-        });
+        let isAnyApplied = allCrownPaths.some((p) =>
+          p.classList.contains("decay"),
+        );
+
         allCrownPaths.forEach((p) => {
           p.classList.remove(...allStatuses);
-          if (!isApplied) p.classList.add("decay");
+          if (!isAnyApplied) p.classList.add("decay");
         });
-        logAction(displayLabel, "Whole Crown", "decay");
+        logAction(
+          displayLabel,
+          "Whole Crown",
+          "decay",
+          isAnyApplied ? "Removed" : "",
+        );
       }
       return;
     }
@@ -732,15 +739,20 @@ function handleConditionApplication(
       },
     );
     if (allToothPaths.length > 0) {
-      let isApplied = false;
-      allToothPaths.forEach((p) => {
-        if (p.classList.contains(appliedClass)) isApplied = true;
-      });
+      let isAnyApplied = allToothPaths.some((p) =>
+        p.classList.contains(appliedClass),
+      );
+
       allToothPaths.forEach((p) => {
         p.classList.remove(...allStatuses);
-        if (!isApplied) p.classList.add(appliedClass);
+        if (!isAnyApplied) p.classList.add(appliedClass);
       });
-      logAction(displayLabel, "Whole Tooth", appliedClass);
+      logAction(
+        displayLabel,
+        "Whole Tooth",
+        appliedClass,
+        isAnyApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -757,15 +769,20 @@ function handleConditionApplication(
         },
       );
       if (allToothPaths.length > 0) {
-        let isApplied = false;
-        allToothPaths.forEach((p) => {
-          if (p.classList.contains(appliedClass)) isApplied = true;
-        });
+        let isAnyApplied = allToothPaths.some((p) =>
+          p.classList.contains(appliedClass),
+        );
+
         allToothPaths.forEach((p) => {
           p.classList.remove(...allStatuses);
-          if (!isApplied) p.classList.add(appliedClass);
+          if (!isAnyApplied) p.classList.add(appliedClass);
         });
-        logAction(displayLabel, "Whole Tooth", appliedClass);
+        logAction(
+          displayLabel,
+          "Whole Tooth",
+          appliedClass,
+          isAnyApplied ? "Removed" : "",
+        );
       }
       return;
     }
@@ -780,14 +797,19 @@ function handleConditionApplication(
       },
     );
     if (allToothPaths.length > 0) {
-      let isApplied = allToothPaths.some((p) =>
+      let isAnyApplied = allToothPaths.some((p) =>
         p.classList.contains(appliedClass),
       );
       allToothPaths.forEach((p) => {
         p.classList.remove(...allStatuses);
-        if (!isApplied) p.classList.add(appliedClass);
+        if (!isAnyApplied) p.classList.add(appliedClass);
       });
-      logAction(displayLabel, "Whole Tooth", appliedClass);
+      logAction(
+        displayLabel,
+        "Whole Tooth",
+        appliedClass,
+        isAnyApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -795,14 +817,19 @@ function handleConditionApplication(
   // 6. Pontic - Root only black out
   if (tool === "pontic") {
     if (rootPaths.length > 0) {
-      let isApplied = rootPaths.some((p) =>
+      let isAnyApplied = rootPaths.some((p) =>
         p.classList.contains("pontic-root"),
       );
       rootPaths.forEach((p) => {
         p.classList.remove(...allStatuses);
-        if (!isApplied) p.classList.add("pontic-root");
+        if (!isAnyApplied) p.classList.add("pontic-root");
       });
-      logAction(displayLabel, "Root Blacked Out", "pontic");
+      logAction(
+        displayLabel,
+        "Root Blacked Out",
+        "pontic",
+        isAnyApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -833,12 +860,19 @@ function handleConditionApplication(
     }
 
     if (pathsToApply.length > 0) {
-      let isApplied = pathsToApply.some((p) => p.classList.contains("veneer"));
+      let isAnyApplied = pathsToApply.some((p) =>
+        p.classList.contains("veneer"),
+      );
       pathsToApply.forEach((p) => {
         p.classList.remove(...allStatuses);
-        if (!isApplied) p.classList.add("veneer");
+        if (!isAnyApplied) p.classList.add("veneer");
       });
-      logAction(displayLabel, "Buccal Crown & Top", "veneer");
+      logAction(
+        displayLabel,
+        "Buccal Crown & Top",
+        "veneer",
+        isAnyApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -853,7 +887,12 @@ function handleConditionApplication(
       );
       if (!isApplied) topOverlay.classList.add(appliedClass);
       const dir = appliedClass.includes("vertical") ? "Vertical" : "Horizontal";
-      logAction(displayLabel, "Crown " + dir, appliedClass);
+      logAction(
+        displayLabel,
+        "Crown " + dir,
+        appliedClass,
+        isApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -861,16 +900,20 @@ function handleConditionApplication(
   // 9. Root Fracture
   if (appliedClass.startsWith("fracture-root")) {
     if (rootPaths.length > 0) {
-      let isApplied = false;
-      rootPaths.forEach((p) => {
-        if (p.classList.contains(appliedClass)) isApplied = true;
-      });
+      let isAnyApplied = rootPaths.some((p) =>
+        p.classList.contains(appliedClass),
+      );
       rootPaths.forEach((p) => {
         p.classList.remove(...allStatuses);
-        if (!isApplied) p.classList.add(appliedClass);
+        if (!isAnyApplied) p.classList.add(appliedClass);
       });
       const dir = appliedClass.includes("vertical") ? "Vertical" : "Horizontal";
-      logAction(displayLabel, "Root " + dir, appliedClass);
+      logAction(
+        displayLabel,
+        "Root " + dir,
+        appliedClass,
+        isAnyApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -878,13 +921,10 @@ function handleConditionApplication(
   // 10. Implant Logic (Targets specific Implant/Root paths natively & Swaps underlying image)
   if (tool === "implant") {
     if (rootPaths.length > 0) {
-      let isApplied = false;
-      rootPaths.forEach((p) => {
-        if (p.classList.contains("implant")) isApplied = true;
-      });
+      let isAnyApplied = rootPaths.some((p) => p.classList.contains("implant"));
       rootPaths.forEach((p) => {
         p.classList.remove(...allStatuses);
-        if (!isApplied) p.classList.add("implant");
+        if (!isAnyApplied) p.classList.add("implant");
       });
 
       // Visually Swap the Root Images!
@@ -895,7 +935,7 @@ function handleConditionApplication(
         ".tooth-view-item.normal-back img",
       );
 
-      if (!isApplied) {
+      if (!isAnyApplied) {
         if (normalImg)
           normalImg.src = "normal-implant-root/" + displayLabel + ".png";
         if (normalBackImg)
@@ -907,7 +947,12 @@ function handleConditionApplication(
           normalBackImg.src = "normal-back-view-img/" + displayLabel + ".png";
       }
 
-      logAction(displayLabel, "Root (Implant Applied)", "implant");
+      logAction(
+        displayLabel,
+        "Root (Implant Applied)",
+        "implant",
+        isAnyApplied ? "Removed" : "",
+      );
     }
     return;
   }
@@ -1052,16 +1097,31 @@ function handleConditionApplication(
     }
   }
 
-  if (isDoubleClick && pathsToUpdate) {
-    pathsToUpdate.forEach((p) => {
-      const lbl = (p.getAttribute("data-section-label") || "").toLowerCase();
-      if (!lbl.startsWith("tooth ")) {
-        p.classList.remove(...allStatuses);
+  if (isDoubleClick) {
+    // Double Click -> Apply to ALL crown sections (Front, Back, Top) simultaneously
+    const allCrownPaths = Array.from(tooth.querySelectorAll("path")).filter(
+      isCrownPath,
+    );
+    let isAnyApplied = allCrownPaths.some((p) =>
+      p.classList.contains(finalClassToAdd),
+    );
+
+    allCrownPaths.forEach((p) => {
+      p.classList.remove(...allStatuses);
+      // Toggle logic: If none are applied, apply to all. If any are applied, clear them.
+      if (!isAnyApplied || appliedClass === "healthy") {
         p.classList.add(finalClassToAdd);
       }
     });
-    logAction(displayLabel, "Entire View", finalClassToAdd);
+
+    logAction(
+      displayLabel,
+      "Entire Crown",
+      finalClassToAdd,
+      isAnyApplied && appliedClass !== "healthy" ? "Removed" : "",
+    );
   } else if (sectionLabel) {
+    // Single Click -> Apply to specific hovered section
     const matchingPaths = tooth.querySelectorAll(
       `path[data-section-label="${sectionLabel}"]`,
     );
@@ -1071,10 +1131,17 @@ function handleConditionApplication(
     });
     matchingPaths.forEach((p) => {
       p.classList.remove(...allStatuses);
-      if (!isApplied || appliedClass === "healthy")
+      // Toggle logic: If the section isn't applied, apply it. If it is, clear it.
+      if (!isApplied || appliedClass === "healthy") {
         p.classList.add(finalClassToAdd);
+      }
     });
-    logAction(displayLabel, sectionLabel, finalClassToAdd);
+    logAction(
+      displayLabel,
+      sectionLabel,
+      finalClassToAdd,
+      isApplied && appliedClass !== "healthy" ? "Removed" : "",
+    );
   }
 }
 
@@ -1918,8 +1985,7 @@ exportJsonBtn.addEventListener("click", async () => {
     // 1. SCROLL TO TOP to prevent rendering offsets when exporting
     window.scrollTo(0, 0);
 
-    // 2. LOCK CONTAINER WIDTH to enforce perfect aspect ratios on the teeth images and SVG paths
-    // Fix: Instead of forcing 1200px (which stretched them on small screens), we lock to the exact current width!
+    // 2. LOCK CONTAINER WIDTH to enforce perfect aspect ratios
     const appContainer = document.getElementById("appContainer");
     const originalContainerWidth = appContainer.style.width;
     const originalContainerMaxWidth = appContainer.style.maxWidth;
@@ -1930,6 +1996,16 @@ exportJsonBtn.addEventListener("click", async () => {
 
     // Apply PDF exporting class to safeguard image ratios
     mainView.classList.add("pdf-exporting");
+
+    // Force SVGs to have explicit sizes for the renderer
+    const allSvgs = mainView.querySelectorAll("svg");
+    allSvgs.forEach((svg) => {
+      const rect = svg.getBoundingClientRect();
+      if (rect.width > 0) {
+        svg.setAttribute("width", rect.width);
+        svg.setAttribute("height", rect.height);
+      }
+    });
 
     // Expand hidden arches
     const upperArch = document.querySelector(".arch:has(#upperLeft)");
@@ -1960,16 +2036,31 @@ exportJsonBtn.addEventListener("click", async () => {
 
     mainView.appendChild(exportSummaryWrapper);
 
-    // Allow layout to settle and redraw wires accurately on the container
+    // Allow layout to settle
     if (window.redrawBraceWires) window.redrawBraceWires();
-    await new Promise((r) => setTimeout(r, 600)); // Slightly longer timeout to guarantee reflow completion
+    await new Promise((r) => setTimeout(r, 600));
 
-    // Generate Canvas Image
+    // Generate Canvas Image with explicit Transform handling
     const canvas = await window.html2canvas(mainView, {
       scale: 2,
       useCORS: true,
-      backgroundColor: "#ffffff", // Changed to pure white so the PDF looks cleaner
+      backgroundColor: "#ffffff",
       logging: false,
+      foreignObjectRendering: false, // Force standard canvas rendering for better transform reliability
+      onclone: (clonedDoc) => {
+        // Explicitly bake the transforms into the cloned elements for html2canvas
+        const mirroredElements = clonedDoc.querySelectorAll(
+          ".tooth.q2, .tooth.q3, .tooth.q4, .normal-back-overlay",
+        );
+        mirroredElements.forEach((el) => {
+          const svg = el.querySelector("svg");
+          if (svg) {
+            const style = window.getComputedStyle(svg);
+            svg.style.transform = style.transform;
+            svg.style.transformOrigin = "center center";
+          }
+        });
+      },
     });
 
     // Revert DOM back to user's interactive state
@@ -1991,11 +2082,9 @@ exportJsonBtn.addEventListener("click", async () => {
     const { jsPDF } = window.jspdf;
     const imgData = canvas.toDataURL("image/png");
 
-    // Create A4 portrait PDF
     const pdf = new jsPDF("p", "mm", "a4");
     const pdfWidth = pdf.internal.pageSize.getWidth();
 
-    // Fit to page width with 10mm margin
     const margin = 10;
     const printWidth = pdfWidth - margin * 2;
     const printHeight = (canvas.height * printWidth) / canvas.width;
@@ -2003,14 +2092,11 @@ exportJsonBtn.addEventListener("click", async () => {
     pdf.addImage(imgData, "PNG", margin, margin, printWidth, printHeight);
     pdf.save(`Dental_Chart_${new Date().toISOString().split("T")[0]}.pdf`);
 
-    // Fallback: Still log JSON to console as requested previously
     console.log("--- EXPORTED DENTAL RECORD JSON ---");
     console.log(JSON.stringify(window.dentalRecord, null, 2));
   } catch (err) {
     console.error("PDF Export Error:", err);
-    alert(
-      "Failed to generate export PDF. Make sure you are connected to the internet to load the export libraries.",
-    );
+    alert("Failed to generate export PDF. Please check your connection.");
   } finally {
     exportJsonBtn.textContent = originalText;
     exportJsonBtn.style.pointerEvents = "auto";
