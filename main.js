@@ -31,6 +31,8 @@ fdiStandardList.forEach((fdi) => {
 const globalHistory = {}; // UI History mapper
 const globalToothNotes = {}; // Stores Apical and Dev Disorder notes per tooth visually
 let currentFocusedToothFDI = null;
+let activeTooth = null;
+let activePlaceholder = null;
 
 const allStatuses = [
   "healthy",
@@ -59,6 +61,82 @@ const allStatuses = [
   "devdisorder",
 ];
 let currentActiveTool = "decay"; // Default selected tool
+
+function formatConditionToolLabel(toolValue) {
+  return toolValue
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function getSelectedConditionToolLabel() {
+  const activeToolInput = document.querySelector(
+    'input[name="conditionTool"]:checked',
+  );
+
+  if (!activeToolInput) {
+    return formatConditionToolLabel(currentActiveTool);
+  }
+
+  const toolButton = activeToolInput.closest(".tool-btn");
+  if (toolButton) {
+    const buttonText = toolButton.textContent.replace(/\s+/g, " ").trim();
+    if (buttonText) return buttonText;
+  }
+
+  return formatConditionToolLabel(activeToolInput.value);
+}
+
+function updateSingleToothToolIndicators() {
+  const activeToolLabel = getSelectedConditionToolLabel();
+  const pill = document.getElementById("singleToothActiveTool");
+  const metric = document.getElementById("singleToothActiveToolMetric");
+
+  if (pill) pill.textContent = activeToolLabel;
+  if (metric) metric.textContent = activeToolLabel;
+}
+
+function updateSingleToothMeta(fdi, toothElement) {
+  const title = document.getElementById("singleToothTitle");
+  const subtitle = document.getElementById("singleToothSubtitle");
+  const quadrantEl = document.getElementById("singleToothQuadrant");
+  const typeEl = document.getElementById("singleToothType");
+
+  const quadrantMap = {
+    1: "Upper Right Quadrant",
+    2: "Upper Left Quadrant",
+    3: "Lower Left Quadrant",
+    4: "Lower Right Quadrant",
+  };
+
+  const firstDigit = String(fdi).charAt(0);
+  const quadrantLabel = quadrantMap[firstDigit] || "Focused Tooth View";
+  const archLabel = toothElement.classList.contains("upper")
+    ? "Upper Arch"
+    : "Lower Arch";
+
+  let toothTypeLabel = "Anterior";
+  if (toothElement.classList.contains("type-molar")) {
+    toothTypeLabel = "Molar";
+  } else if (toothElement.classList.contains("type-premolar")) {
+    toothTypeLabel = "Premolar";
+  } else if (
+    toothElement.querySelector(".top-overlay") &&
+    toothElement.querySelector(".normal-overlay")
+  ) {
+    toothTypeLabel = "Incisor / Canine";
+  }
+
+  if (title) title.textContent = `Tooth ${fdi} Clinical Editor`;
+  if (subtitle) {
+    subtitle.textContent =
+      `${quadrantLabel} · ${archLabel} · ` +
+      `${toothTypeLabel} surface review and treatment charting.`;
+  }
+  if (quadrantEl) quadrantEl.textContent = quadrantLabel;
+  if (typeEl) typeEl.textContent = toothTypeLabel;
+
+  updateSingleToothToolIndicators();
+}
 
 // --- SVG CACHE MANAGER ---
 // (Used ONLY for the clickable SVG overlays now)
@@ -115,6 +193,7 @@ document.querySelectorAll('input[name="conditionTool"]').forEach((radio) => {
       .querySelectorAll(".tool-btn")
       .forEach((btn) => btn.classList.remove("active"));
     e.target.closest(".tool-btn").classList.add("active");
+    updateSingleToothToolIndicators();
 
     // Toggle specific sub-options dynamically
     const fracOpts = document.getElementById("fractureSubOptions");
@@ -1234,6 +1313,21 @@ window.addEventListener("resize", () => {
   if (window.redrawBraceWires) window.redrawBraceWires();
 });
 
+// Keep the condition sidebar outside #mainView so it remains visible
+// when the single-tooth editor hides the main chart screen.
+function mountConditionSidebar() {
+  const sidebar = document.getElementById("conditionSidebar");
+  const appContainer = document.getElementById("appContainer");
+
+  if (!sidebar || !appContainer || sidebar.parentElement === appContainer) {
+    return;
+  }
+
+  appContainer.appendChild(sidebar);
+}
+
+mountConditionSidebar();
+
 // --- FOCUS AND SIDEBAR LOGIC ---
 function closeSidebar() {
   const odontogram = document.querySelector(".odontogram");
@@ -1653,11 +1747,17 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
     const mainView = document.getElementById("mainView");
     const singleView = document.getElementById("singleToothView");
     const container = document.getElementById("singleToothEditor");
-    const title = document.getElementById("singleToothTitle");
     const sidebar = document.getElementById("conditionSidebar");
     const mainContent = document.querySelector(".main-content");
+    const subtitle = document.getElementById("singleToothSubtitle");
 
-    title.textContent = "Editing Tooth " + displayLabel;
+    updateSingleToothMeta(displayLabel, tooth);
+    if (subtitle) {
+      subtitle.textContent = subtitle.textContent.replace(
+        /[^\x00-\x7F]+/g,
+        " - ",
+      );
+    }
 
     activePlaceholder = document.createElement("div");
     activePlaceholder.className = tooth.className + " placeholder";
@@ -1675,7 +1775,10 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
     sidebar.classList.remove("sidebar-left", "sidebar-right");
     sidebar.classList.add("sidebar-right");
     sidebar.classList.add("show");
-    // Remove main-content margin adjustments (not needed in single view)
+
+    // Add class to indicate we are in single view to prevent layout shifts
+    mainContent.classList.add("single-view-active");
+    // Remove main-content margin adjustments (not needed in single view as handled by single-view-active)
     mainContent.classList.remove("sidebar-open-left", "sidebar-open-right");
 
     document.getElementById("isolateToothBtn").style.display = "none";
@@ -1777,6 +1880,9 @@ function closeEditorScreen() {
   document.getElementById("singleToothView").style.display = "none";
   document.getElementById("mainView").style.display = "block";
   document.getElementById("isolateToothBtn").style.display = "block";
+  document
+    .querySelector(".main-content")
+    .classList.remove("single-view-active");
   closeSidebar();
 
   if (window.animateBraceWires) window.animateBraceWires();

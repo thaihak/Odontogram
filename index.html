@@ -1336,6 +1336,26 @@
         <!-- SINGLE TOOTH EDITOR SCREEN (Hidden by default) -->
         <div id="singleToothView">
           <div class="screen-header">
+            <div class="screen-header-main">
+              <div class="screen-kicker">Clinical Detail Editor</div>
+              <h2 class="single-tooth-title" id="singleToothTitle">
+                Editing Tooth
+              </h2>
+              <p class="single-tooth-subtitle" id="singleToothSubtitle">
+                Focused surface charting for one tooth at a time.
+              </p>
+              <div class="editor-meta-strip">
+                <span class="editor-meta-chip" id="singleToothQuadrant">
+                  Upper Right
+                </span>
+                <span class="editor-meta-chip" id="singleToothType">
+                  Molar
+                </span>
+                <span class="editor-meta-chip" id="singleToothActiveToolMetric">
+                  Decay
+                </span>
+              </div>
+            </div>
             <button class="back-btn" id="backToChartBtn">
               <svg
                 width="20"
@@ -1351,24 +1371,45 @@
               </svg>
               Back to Chart
             </button>
-            <h2 class="single-tooth-title" id="singleToothTitle">
-              Editing Tooth
-            </h2>
           </div>
 
           <div class="editor-layout">
-            <div id="singleToothEditor"></div>
+            <section class="editor-spotlight-panel">
+              <div class="editor-card-head">
+                <div>
+                  <span class="panel-kicker">Tooth Focus</span>
+                  <h3>Surface Mapping Canvas</h3>
+                </div>
+                <span class="editor-state-pill" id="singleToothActiveTool">
+                  Decay
+                </span>
+              </div>
+              <div id="singleToothEditor"></div>
+              <div class="editor-spotlight-note">
+                Click the tooth surfaces directly to chart findings. Use the
+                condition sidebar to switch between pathology, restoration, and
+                probing tools while staying in this focused clinical view.
+              </div>
+            </section>
+
             <div class="editor-right-panel">
-              <h3>Treatment Details & Notes</h3>
-              <p>
-                This space is reserved for your input forms, treatment history,
-                and specific notes for this isolated tooth. The tooth graphic
-                stays cleanly on the left.
-              </p>
+              <div class="editor-panel-header">
+                <span class="panel-kicker">Chairside Review</span>
+                <h3>Treatment Details & Notes</h3>
+                <p>
+                  Review the current charting and recent actions for this tooth.
+                </p>
+              </div>
 
               <!-- Dynamic Action Log Container -->
               <div class="action-log-container">
-                <h4>Recent Activity Log</h4>
+                <div class="action-log-header">
+                  <div>
+                    <span class="panel-kicker">Timeline</span>
+                    <h4>Recent Activity Log</h4>
+                  </div>
+                  <span class="timeline-hint">Newest first</span>
+                </div>
                 <ul id="actionLogList">
                   <li id="emptyLogState">
                     <em
