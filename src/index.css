@@ -306,7 +306,7 @@ body {
 /* REPLACED `margin-inline` with explicit left/right margins. 
    html2canvas does not reliably parse modern logical properties, which caused the spacing bugs */
 .tooth {
-  width: 60px; /* Increased for tighter front teeth */
+  width: 60px; /* Normal tooth width */
   height: auto;
   margin-left: 1px;
   margin-right: 1px;
@@ -324,7 +324,7 @@ body {
 }
 
 .tooth.tight {
-  width: 50px; /* Increased for tighter front teeth */
+  width: 50px; /* Tight tooth width */
   height: auto;
   margin-left: -1px;
   margin-right: -1px;
@@ -1737,7 +1737,7 @@ body {
   left: auto;
   border-left: 1px solid #e2e8f0;
   border-right: none;
-  box-shadow: -4px 0 25px rgba(0,0,0,0.1);
+  box-shadow: -4px 0 25px rgba(0, 0, 0, 0.1);
 }
 .condition-sidebar.sidebar-right.show {
   right: 0;
@@ -1747,7 +1747,7 @@ body {
   right: auto;
   border-right: 1px solid #e2e8f0;
   border-left: none;
-  box-shadow: 4px 0 25px rgba(0,0,0,0.1);
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.1);
 }
 .condition-sidebar.sidebar-left.show {
   left: 70px;
@@ -1756,7 +1756,9 @@ body {
 /* Focus mode: controlled via React state not .odontogram.focus-mode */
 .odontogram .tooth {
   opacity: 1;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 .odontogram.focus-mode .tooth:not(.focused-tooth) {
   opacity: 0.4;
@@ -1771,15 +1773,17 @@ body {
   opacity: 1;
   transform: scale(1.05);
   z-index: 50;
-  filter: drop-shadow(0 18px 26px rgba(15,23,42,0.14));
+  filter: drop-shadow(0 18px 26px rgba(15, 23, 42, 0.14));
 }
 
 /* Modal backdrop */
 .modal-backdrop {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(15,23,42,0.6);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.6);
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -1793,7 +1797,9 @@ body {
   color: #64748b;
   line-height: 1;
 }
-.close-modal-btn:hover { color: #0f172a; }
+.close-modal-btn:hover {
+  color: #0f172a;
+}
 
 /* Chart title */
 .chart-title {
@@ -1839,13 +1845,17 @@ body {
 .action-log-list li::before {
   content: "";
   position: absolute;
-  left: 0; top: 24px;
-  width: 8px; height: 8px;
+  left: 0;
+  top: 24px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #06b6d4;
-  box-shadow: 0 0 0 4px rgba(103,232,249,0.35);
+  box-shadow: 0 0 0 4px rgba(103, 232, 249, 0.35);
 }
-.action-log-list li:last-child { border-bottom: none; }
+.action-log-list li:last-child {
+  border-bottom: none;
+}
 
 /* Editor history list */
 .editor-history-section {
@@ -1868,7 +1878,9 @@ body {
   padding: 8px 0;
   border-bottom: 1px solid #f1f5f9;
 }
-.editor-history-list li:last-child { border-bottom: none; }
+.editor-history-list li:last-child {
+  border-bottom: none;
+}
 
 /* SVG section-overlay: allow pointer events through React */
 .section-overlay svg path {
@@ -1876,21 +1888,71 @@ body {
 }
 
 /* Fix: odontogram focus mode is applied via React */
-#mainView .odontogram .tooth { pointer-events: auto; }
+#mainView .odontogram .tooth {
+  pointer-events: auto;
+}
 
 /* pfm status badges */
-.status-badge.pfm { background: #f1f5f9; color: #334155; border: 1px solid #64748b; }
-.status-badge.pfm-zirconia { background: #ffffff; color: #475569; border: 1px dashed #94a3b8; }
-.status-badge.pfm-metal { background: #cbd5e1; color: #1e293b; border: 1px solid #475569; }
-.status-badge.implant { background: #f1f5f9; color: #334155; border: 1px dashed #64748b; }
-.status-badge.veneer { background: #e0f2fe; color: #0369a1; border: 1px solid #0284c7; }
-.status-badge.pontic { background: #1e293b; color: #f8fafc; border: 1px solid #0f172a; }
-.status-badge.endo { background: #fdf4ff; color: #c026d3; border: 1px solid #f5d0fe; }
-.status-badge.eruption { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-.status-badge.brace { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; }
-.status-badge.probing { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-.status-badge.to-be-extracted { background: rgba(239,68,68,0.1); color: #dc2626; border: 1px dashed #ef4444; }
+.status-badge.pfm {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #64748b;
+}
+.status-badge.pfm-zirconia {
+  background: #ffffff;
+  color: #475569;
+  border: 1px dashed #94a3b8;
+}
+.status-badge.pfm-metal {
+  background: #cbd5e1;
+  color: #1e293b;
+  border: 1px solid #475569;
+}
+.status-badge.implant {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px dashed #64748b;
+}
+.status-badge.veneer {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #0284c7;
+}
+.status-badge.pontic {
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #0f172a;
+}
+.status-badge.endo {
+  background: #fdf4ff;
+  color: #c026d3;
+  border: 1px solid #f5d0fe;
+}
+.status-badge.eruption {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+.status-badge.brace {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+.status-badge.probing {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+.status-badge.to-be-extracted {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px dashed #ef4444;
+}
 .status-badge.fracture-crown-vertical,
 .status-badge.fracture-crown-horizontal,
 .status-badge.fracture-root-vertical,
-.status-badge.fracture-root-horizontal { background: #ffe0b2; color: #e65100; border: 1px solid #ffb74d; }
+.status-badge.fracture-root-horizontal {
+  background: #ffe0b2;
+  color: #e65100;
+  border: 1px solid #ffb74d;
+}
