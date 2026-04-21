@@ -132,6 +132,11 @@ function updateSingleToothMeta(fdi, toothElement) {
       `${quadrantLabel} · ${archLabel} · ` +
       `${toothTypeLabel} surface review and treatment charting.`;
   }
+  if (subtitle) {
+    subtitle.textContent =
+      `${quadrantLabel} - ${archLabel} - ` +
+      `${toothTypeLabel} surface review and treatment charting.`;
+  }
   if (quadrantEl) quadrantEl.textContent = quadrantLabel;
   if (typeEl) typeEl.textContent = toothTypeLabel;
 
@@ -712,7 +717,7 @@ function handleConditionApplication(
     return lbl.includes("root");
   });
 
-  // 1. Wear Override - Crown surface coverage (excl. root) + Top Buccal/Palatal parts
+  // 1. Wear Override - Crown surface coverage (excl. root) + Top Buccal/Palatal-Lingual parts
   if (tool === "wear") {
     const wearSurface = document.querySelector(
       'input[name="wearSurface"]:checked',
@@ -1468,6 +1473,15 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
         handleConditionApplication(tooth, displayLabel, null, true, topPaths);
       });
 
+      const topInnerSurfaceLabel = isUpper ? "Palatal" : "Lingual";
+      const topMesialInnerCuspLabel = isUpper
+        ? "Mesio Palatal Cusp"
+        : "Mesio Lingual Cusp";
+      const topDistalInnerCuspLabel = isUpper
+        ? "Disto Palatal Cusp"
+        : "Disto Lingual Cusp";
+      const topInnerCuspLabel = isUpper ? "Palatal Cusp" : "Lingual Cusp";
+
       let topAnatomyLabels = [];
       if (sectionType === "molar") {
         topAnatomyLabels = [
@@ -1475,8 +1489,8 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
           "Occlusal",
           "Mesial",
           "Distal",
-          "Mesio Palatal Cusp",
-          "Disto Palatal Cusp",
+          topMesialInnerCuspLabel,
+          topDistalInnerCuspLabel,
           "Mesio Buccal Cusp",
           "Disto Buccal Cusp",
         ];
@@ -1486,8 +1500,8 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
           "Mesial",
           "Buccal Cusp",
           "Buccal Surface",
-          "Palatal Cusp",
-          "Palatal Surface",
+          topInnerCuspLabel,
+          `${topInnerSurfaceLabel} Surface`,
           "Distal",
           "Occlusal",
         ];
@@ -1495,7 +1509,7 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
         topAnatomyLabels = [
           "Tooth " + displayLabel,
           "Distal",
-          "Palatal Surface",
+          `${topInnerSurfaceLabel} Surface`,
           "Mesial",
           "Buccal Surface",
           "Incisal",
@@ -1506,7 +1520,7 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
         const fallbackName =
           topAnatomyLabels[index] || `Top Section ${index + 1}`;
         const sectionNameRaw =
-          path.id || path.getAttribute("name") || fallbackName;
+          fallbackName || path.id || path.getAttribute("name");
         const sectionLabel =
           sectionNameRaw.charAt(0).toUpperCase() +
           sectionNameRaw.slice(1).replace(/[-_]/g, " ");
@@ -1671,38 +1685,46 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
         handleConditionApplication(tooth, displayLabel, null, true, backPaths);
       });
 
+      const innerSurfaceLabel = isUpper ? "Palatal" : "Lingual";
+      const mesialInnerCuspLabel = isUpper
+        ? "Mesio Palatal Cusp"
+        : "Mesio Lingual Cusp";
+      const distalInnerCuspLabel = isUpper
+        ? "Disto Palatal Cusp"
+        : "Disto Lingual Cusp";
+
       let backAnatomyLabels = [];
       if (sectionType === "molar") {
         backAnatomyLabels = [
           "Tooth " + displayLabel,
           "Root",
-          "Disto Palatal Cusp",
-          "Mesio Palatal Cusp",
+          distalInnerCuspLabel,
+          mesialInnerCuspLabel,
           "Mesial",
           "Distal",
 
-          "Cervical Palatal",
-          "Palatal",
+          `Cervical ${innerSurfaceLabel}`,
+          innerSurfaceLabel,
         ];
       } else if (sectionType === "premolar") {
         backAnatomyLabels = [
           "Tooth " + displayLabel,
           "Root",
-          "Buccal",
-          "Buccal Surface",
+          innerSurfaceLabel,
+          `${innerSurfaceLabel} Surface`,
           "Mesial",
           "Distal",
 
-          "Cervical Buccal",
+          `Cervical ${innerSurfaceLabel}`,
         ];
       } else {
         backAnatomyLabels = [
           "Tooth " + displayLabel,
           "Root",
-          "Palatal Surface",
+          `${innerSurfaceLabel} Surface`,
           "Incisal",
-          "Cervical Palatal",
-          "Palatal",
+          `Cervical ${innerSurfaceLabel}`,
+          innerSurfaceLabel,
           "Mesial",
           "Distal",
         ];
@@ -1712,7 +1734,7 @@ function createToothElement(toothNumber, displayLabel, isUpper = true) {
         const fallbackName =
           backAnatomyLabels[index] || `Back Section ${index + 1}`;
         const sectionNameRaw =
-          path.id || path.getAttribute("name") || fallbackName;
+          fallbackName || path.id || path.getAttribute("name");
         const sectionLabel =
           sectionNameRaw.charAt(0).toUpperCase() +
           sectionNameRaw.slice(1).replace(/[-_]/g, " ");
