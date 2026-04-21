@@ -1972,3 +1972,409 @@ body {
   color: #e65100;
   border: 1px solid #ffb74d;
 }
+/* --- Patients Page Layout --- */
+.patients-page {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 32px;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  box-sizing: border-box;
+}
+
+/* --- Header & Tabs --- */
+.patients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 16px;
+}
+.header-tabs {
+  display: flex;
+  gap: 32px;
+}
+.tab-active {
+  color: #0284c7;
+  font-weight: 700;
+  border: none;
+  background: none;
+  border-bottom: 2px solid #0284c7;
+  padding-bottom: 16px;
+  margin-bottom: -17px; /* Pulls border down to overlap container border */
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.tab-inactive {
+  color: #94a3b8;
+  font-weight: 600;
+  border: none;
+  background: none;
+  padding-bottom: 16px;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.tab-inactive:hover {
+  color: #475569;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user-name {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+}
+.btn-settings {
+  background: none;
+  border: none;
+  color: #0284c7;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+.btn-settings:hover {
+  color: #0369a1;
+}
+
+/* --- Action Bar (Search & Button) --- */
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.search-wrapper {
+  position: relative;
+  width: 384px;
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+.search-input {
+  width: 100%;
+  padding: 10px 16px 10px 40px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.search-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 1px #0284c7;
+}
+
+.btn-new-patient {
+  background-color: #0284c7;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.btn-new-patient:hover {
+  background-color: #0369a1;
+}
+
+/* --- Table Styles --- */
+.patients-table {
+  width: 100%;
+}
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 2fr auto;
+  gap: 16px;
+  padding: 12px 24px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.text-right {
+  text-align: right;
+}
+
+.table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 2fr auto;
+  gap: 16px;
+  align-items: center;
+  background-color: white;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 10px -4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.table-row:hover {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Row Contents */
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.patient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f9ff;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid #e0f2fe;
+}
+.patient-name {
+  color: #0284c7;
+  font-weight: 600;
+  font-size: 14px;
+}
+.table-row:hover .patient-name {
+  text-decoration: underline;
+}
+
+.text-cell {
+  color: #475569;
+  font-size: 14px;
+}
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 16px;
+}
+
+.action-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+.btn-action {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  padding: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+.btn-action:hover {
+  color: #0284c7;
+}
+
+/* --- Pagination --- */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  font-size: 14px;
+  color: #64748b;
+}
+.pagination-buttons {
+  display: flex;
+  gap: 8px;
+}
+.btn-page {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-page:hover {
+  background-color: #f8fafc;
+  color: #475569;
+}
+/* --- Modal Overlay & Container --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 12px;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+/* --- Modal Header --- */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+}
+.btn-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.btn-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* --- Modal Body & Forms --- */
+.modal-body {
+  padding: 24px;
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0f172a;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* --- Modal Footer & Buttons --- */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+.btn-cancel {
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-cancel:hover {
+  background: #f8fafc;
+}
+.btn-save {
+  padding: 10px 20px;
+  background: #0284c7;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-save:hover {
+  background: #0369a1;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Add this to app.css */
+.datepicker-wrapper .react-datepicker-wrapper {
+  width: 100%;
+}
