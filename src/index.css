@@ -199,15 +199,34 @@ body {
 
 /* New Summary Button style */
 .summary-btn {
-  background: linear-gradient(135deg, #0f766e 0%, #0891b2 100%) !important;
+  background-color: #0f766e !important; /* Solid, professional teal */
   color: white !important;
-  border-color: transparent !important;
+  border: none !important;
+  padding: 10px 20px;
   margin-left: 8px;
-  font-weight: 700;
-  box-shadow: 0 14px 30px rgba(8, 145, 178, 0.18) !important;
+  font-weight: 600; /* Dropped from 700 to 600 for a cleaner look */
+  border-radius: 8px; /* Added soft rounded corners */
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(15, 118, 110, 0.2) !important; /* Subtle, elegant shadow */
+  transition: all 0.2s ease-in-out; /* Smooth animations */
+
+  /* Centers text and an icon if you use one */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
+
 .summary-btn:hover {
-  background: linear-gradient(135deg, #0f766e 0%, #0284c7 100%) !important;
+  background-color: #115e59 !important; /* Slightly darker teal on hover */
+  box-shadow: 0 6px 10px -2px rgba(15, 118, 110, 0.3) !important; /* Shadow slightly expands */
+  transform: translateY(-1px); /* Gentle lift effect */
+}
+
+.summary-btn:active {
+  background-color: #134e4a !important; /* Even darker on click */
+  box-shadow: 0 2px 4px -1px rgba(15, 118, 110, 0.2) !important; /* Shadow flattens */
+  transform: translateY(1px); /* Pushes the button down slightly */
 }
 
 .odontogram {
@@ -973,12 +992,15 @@ body {
 }
 .pill-btn {
   display: block;
-  padding: 6px 10px;
+  padding: 6px 4px; /* Added horizontal padding */
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: #64748b;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  white-space: nowrap; /* Stops text from wrapping awkwardly */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds '...' if the screen is too narrow */
 }
 .pill-group input[type="radio"]:checked + .pill-btn {
   background: #fff;
@@ -986,28 +1008,18 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.custom-select {
-  width: 140px;
-  padding: 4px 8px;
-  font-size: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  background-color: #fff;
-  color: #334155;
-  outline: none;
-}
+.custom-select,
 .custom-textarea {
   width: 100%;
-  padding: 8px;
-  font-size: 12px;
+  margin-left: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.5; /* Forces the text & placeholder to sit cleanly */
   border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  resize: vertical;
-  min-height: 60px;
-  margin-top: 5px;
-  font-family: inherit;
-  background: #fff;
-  color: #334155;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  transition: border-color 0.2s;
 }
 
 .save-note-btn {
@@ -1042,18 +1054,22 @@ body {
 }
 
 .add-details-btn {
-  display: block;
+  display: flex; /* Flexbox forces text to stay perfectly centered */
+  align-items: center;
+  justify-content: center;
   width: 100%;
   margin-bottom: 20px;
-  padding: 8px;
+  padding: 12px 10px; /* Thicker padding so it breathes */
   background: #f8fafc;
   border: 1px dashed #cbd5e1;
   border-radius: 6px;
   cursor: pointer;
   color: #64748b;
   font-size: 12px;
-  font-weight: bold;
-  transition: all 0.2s;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+  transition: all 0.2s ease;
 }
 .add-details-btn:hover {
   background: #f1f5f9;

@@ -203,6 +203,7 @@ body {
   color: white !important;
   border-color: transparent !important;
   margin-left: 8px;
+  padding: 12px 22px;
   font-weight: 700;
   box-shadow: 0 14px 30px rgba(8, 145, 178, 0.18) !important;
 }
