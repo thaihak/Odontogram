@@ -153,9 +153,8 @@ body {
 
 #mainView h1 {
   text-align: center;
-  margin-bottom: 14px;
   color: #0f172a;
-  font-size: clamp(28px, 4vw, 38px);
+  font-size: 24px;
   line-height: 1.12;
   letter-spacing: -0.03em;
 }
@@ -165,7 +164,7 @@ body {
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-block: 32px;
 }
 
 .controls button {
@@ -1741,12 +1740,12 @@ body {
   width: 320px;
   height: 100vh;
   background: white;
-  padding: 25px 20px;
+  padding: 0;
   z-index: 900;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
 }
 .condition-sidebar.sidebar-right {
   right: -340px;
@@ -1767,6 +1766,54 @@ body {
 }
 .condition-sidebar.sidebar-left.show {
   left: 70px;
+}
+
+/* Sidebar header - fixed at top */
+.condition-sidebar .sidebar-header {
+  padding: 25px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  flexshrink: 0;
+}
+
+/* Sidebar tabs - fixed below header */
+.condition-sidebar .sidebar-tabs {
+  padding: 0 20px;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #f1f5f9;
+  flexshrink: 0;
+  backgroundcolor: #fafbfc;
+}
+
+.condition-sidebar .sidebar-tabs .tab-btn {
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  fontsize: 0.875rem;
+  fontweight: 500;
+  color: #64748b;
+  borderbottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.condition-sidebar .sidebar-tabs .tab-btn.active {
+  color: #0d6466;
+  borderbottomcolor: #0d6466;
+}
+
+/* Scrollable content area */
+.condition-sidebar .tab-content {
+  padding: 20px;
+  overflow-y: auto;
+  overscrollbehavior: contain;
+  flex: 1;
+  display: none;
+}
+
+.condition-sidebar .tab-content.active {
+  display: block;
 }
 
 /* Focus mode: controlled via React state not .odontogram.focus-mode */
@@ -1824,10 +1871,8 @@ body {
   justify-content: center;
   gap: 12px;
   text-align: center;
-  margin-bottom: 14px;
   color: #0f172a;
-  font-size: clamp(28px, 4vw, 38px);
-  line-height: 1.12;
+  font-size: 24px;
   letter-spacing: -0.03em;
 }
 
@@ -1976,12 +2021,14 @@ body {
 .patients-page {
   min-height: 100vh;
   background-color: #f8fafc;
-  padding: 32px;
+  padding: clamp(16px, 4vw, 32px); /* Responsive padding */
   font-family:
+    "Inter",
     system-ui,
     -apple-system,
     sans-serif;
   box-sizing: border-box;
+  color: #0f172a;
 }
 
 /* --- Header & Tabs --- */
@@ -1993,129 +2040,168 @@ body {
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 16px;
 }
+
 .header-tabs {
   display: flex;
-  gap: 32px;
+  gap: 8px; /* Reduced gap, moved spacing to padding for Fitts's Law */
 }
+
+/* Unified tab styling to reduce redundant code */
+.tab-active,
+.tab-inactive {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 8px 16px; /* Larger click target */
+  margin-bottom: -17px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .tab-active {
   color: #0284c7;
-  font-weight: 700;
-  border: none;
-  background: none;
-  border-bottom: 2px solid #0284c7;
-  padding-bottom: 16px;
-  margin-bottom: -17px; /* Pulls border down to overlap container border */
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  cursor: pointer;
+  border-bottom-color: #0284c7;
 }
+
 .tab-inactive {
   color: #94a3b8;
-  font-weight: 600;
-  border: none;
-  background: none;
-  padding-bottom: 16px;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: color 0.2s ease;
 }
+
 .tab-inactive:hover {
   color: #475569;
+  background-color: #ffffff;
+  border-radius: 6px 6px 0 0; /* Soft visual grounding */
 }
 
 .header-user {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
+
 .user-name {
   color: #475569;
   font-size: 14px;
   font-weight: 500;
 }
+
 .btn-settings {
   background: none;
   border: none;
-  color: #0284c7;
+  color: #94a3b8;
   cursor: pointer;
-  transition: color 0.2s ease;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
 }
+
 .btn-settings:hover {
-  color: #0369a1;
+  color: #0284c7;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 /* --- Action Bar (Search & Button) --- */
 .action-bar {
   display: flex;
+  flex-wrap: wrap; /* Allows stacking on small screens */
+  gap: 16px;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
 }
+
 .search-wrapper {
   position: relative;
-  width: 384px;
+  width: 100%;
+  max-width: 384px; /* Fluid width instead of fixed */
 }
+
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: #94a3b8;
+  pointer-events: none; /* Prevents icon from stealing clicks */
 }
+
 .search-input {
   width: 100%;
-  padding: 10px 16px 10px 40px;
-  border-radius: 8px;
+  padding: 12px 16px 12px 44px; /* Slightly taller for better UX */
+  border-radius: 10px;
   border: 1px solid #e2e8f0;
-  background-color: white;
+  background-color: #ffffff;
+  color: #0f172a;
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
-.search-input:focus {
+
+.search-input:focus,
+.search-input:focus-visible {
   border-color: #0284c7;
-  box-shadow: 0 0 0 1px #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25); /* Accessible focus ring */
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
 }
 
 .btn-new-patient {
   background-color: #0284c7;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.05),
+    0 2px 4px -2px rgb(0 0 0 / 0.05);
 }
+
 .btn-new-patient:hover {
   background-color: #0369a1;
+  transform: translateY(-1px); /* Tactile feedback */
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.08),
+    0 4px 6px -4px rgb(0 0 0 / 0.04);
+}
+
+.btn-new-patient:active {
+  transform: translateY(0); /* Press down effect */
 }
 
 /* --- Table Styles --- */
 .patients-table {
   width: 100%;
 }
+
 .table-header {
   display: grid;
   grid-template-columns: 2fr 1.5fr 1.5fr 2fr auto;
   gap: 16px;
-  padding: 12px 24px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #64748b;
+  padding: 0 24px 12px 24px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
 }
+
 .text-right {
   text-align: right;
 }
@@ -2123,23 +2209,29 @@ body {
 .table-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 12px; /* Whitespace over borders (Gestalt Proximity) */
 }
+
 .table-row {
   display: grid;
   grid-template-columns: 2fr 1.5fr 1.5fr 2fr auto;
   gap: 16px;
   align-items: center;
-  background-color: white;
-  padding: 16px;
+  background-color: #ffffff;
+  padding: 16px 24px;
   border-radius: 12px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 2px 10px -4px rgba(0, 0, 0, 0.05);
+  border: 1px solid transparent; /* Prevents layout shift on hover */
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .table-row:hover {
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.08),
+    0 4px 6px -4px rgb(0 0 0 / 0.04);
+  transform: translateY(-2px); /* Physical elevation */
+  border-color: #e2e8f0;
 }
 
 /* Row Contents */
@@ -2148,32 +2240,37 @@ body {
   align-items: center;
   gap: 16px;
 }
+
 .patient-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px; /* Slightly larger */
+  height: 44px;
+  flex-shrink: 0;
   border-radius: 50%;
   background-color: #f0f9ff;
   color: #0284c7;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 14px;
-  border: 1px solid #e0f2fe;
+  font-weight: 600;
+  font-size: 15px;
 }
+
 .patient-name {
-  color: #0284c7;
+  color: #0f172a; /* Darker for visual hierarchy */
   font-weight: 600;
   font-size: 14px;
+  transition: color 0.2s;
 }
+
 .table-row:hover .patient-name {
-  text-decoration: underline;
+  color: #0284c7; /* Changes color instead of underline for modern feel */
 }
 
 .text-cell {
   color: #475569;
   font-size: 14px;
 }
+
 .text-truncate {
   white-space: nowrap;
   overflow: hidden;
@@ -2185,18 +2282,22 @@ body {
   display: flex;
   justify-content: flex-end;
 }
+
 .btn-action {
   background: none;
   border: none;
   color: #94a3b8;
-  padding: 4px;
+  padding: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
 }
+
 .btn-action:hover {
   color: #0284c7;
+  background-color: #f0f9ff; /* Soft highlight */
 }
 
 /* --- Pagination --- */
@@ -2206,29 +2307,42 @@ body {
   align-items: center;
   margin-top: 32px;
   font-size: 14px;
-  color: #64748b;
+  color: #475569;
 }
+
 .pagination-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
+
 .btn-page {
-  width: 32px;
-  height: 32px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: white;
+  background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  color: #94a3b8;
+  border-radius: 6px;
+  color: #475569;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .btn-page:hover {
   background-color: #f8fafc;
-  color: #475569;
+  color: #0284c7;
+  border-color: #0284c7;
 }
+
+.btn-page.active {
+  background-color: #0284c7;
+  color: white;
+  border-color: #0284c7;
+}
+
 /* --- Modal Overlay & Container --- */
 .modal-overlay {
   position: fixed;

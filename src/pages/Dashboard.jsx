@@ -5,12 +5,13 @@ import {
   Beaker,
   DollarSign,
   ChevronRight,
+  ChevronLeft,
   Calendar,
   LayoutDashboard,
   Plus,
 } from "lucide-react";
 
-export default function Dashboard({ onNewEncounter }) {
+export default function Dashboard({ onNewEncounter, onBack }) {
   const summaryCards = [
     {
       label: "Today's Encounters",
@@ -57,8 +58,27 @@ export default function Dashboard({ onNewEncounter }) {
           padding: "1rem 1.5rem",
           background: "#fff",
           borderBottom: "1px solid #e2e8f0",
+          gap: "1rem",
         }}
       >
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              color: "#0f172a",
+              padding: "0.5rem",
+              flexShrink: 0,
+            }}
+            title="Go back"
+          >
+            <ChevronLeft size={24} />
+          </button>
+        )}
         <div>
           <h1
             style={{

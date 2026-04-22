@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { useDental } from "../context/DentalContext";
+import { ChevronLeft } from "lucide-react";
 import Arch from "./Arch";
 import BraceWires from "./BraceWires";
 
@@ -43,7 +44,8 @@ const LEGEND_ITEMS = [
   { label: "Treated", style: { background: "#e0e0ff" } },
 ];
 
-export default function OdontogramChart() {
+// 1. Added the `patient` prop here
+export default function OdontogramChart({ onBack, patient }) {
   const { state, setViewMode, openSummary } = useDental();
   const { viewMode, editorOpen } = state.ui;
   const upperRef = useRef(null);
@@ -54,12 +56,179 @@ export default function OdontogramChart() {
   return (
     <div id="mainView">
       <div className="container">
-        <h1 className="chart-title">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="#3b82f6">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3S13.66 11 12 11s-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-          </svg>
-          Odontogram — Dental Chart System
-        </h1>
+        {/* 2. Modified this header to spread items apart and show the patient badge */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            marginBottom: "1.5rem",
+          }}
+        >
+          {/* Left Side: Title & Back Button */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            {onBack && (
+              <button
+                onClick={onBack}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#0f172a",
+                  padding: "0.5rem",
+                  flexShrink: 0,
+                }}
+                title="Go back"
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+            <h1 className="chart-title" style={{ margin: 0 }}>
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="#3b82f6"
+                style={{ verticalAlign: "middle", marginRight: "8px" }}
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3S13.66 11 12 11s-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+              </svg>
+              Odontogram
+            </h1>
+          </div>
+
+          {/* Right Side: Patient Info Badge */}
+          {patient && (
+            <div
+              style={{
+                background: "#ffffff",
+                borderRadius: "0.5rem",
+                padding: "1rem 1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                border: "1px solid #e2e8f0",
+                minWidth: "280px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                    color: "#64748b",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Patient Information
+                </span>
+              </div>
+
+              <div
+                style={{
+                  borderTop: "1px solid #f1f5f9",
+                  paddingTop: "0.75rem",
+                }}
+              >
+                <div style={{ marginBottom: "0.75rem" }}>
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      fontWeight: "600",
+                      color: "#94a3b8",
+                      textTransform: "uppercase",
+                      display: "block",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Name
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: "600",
+                      color: "#0f172a",
+                      marginTop: "0.25rem",
+                      display: "block",
+                    }}
+                  >
+                    {patient.name}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: "600",
+                        color: "#94a3b8",
+                        textTransform: "uppercase",
+                        display: "block",
+                        letterSpacing: "0.5px",
+                      }}
+                    >
+                      Patient ID
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.875rem",
+                        fontWeight: "500",
+                        color: "#0f172a",
+                        marginTop: "0.25rem",
+                        display: "block",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {patient.id}
+                    </span>
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: "600",
+                        color: "#94a3b8",
+                        textTransform: "uppercase",
+                        display: "block",
+                        letterSpacing: "0.5px",
+                      }}
+                    >
+                      DOB
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.875rem",
+                        fontWeight: "500",
+                        color: "#0f172a",
+                        marginTop: "0.25rem",
+                        display: "block",
+                      }}
+                    >
+                      {patient.dob}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="controls">
           {[

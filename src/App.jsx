@@ -36,12 +36,16 @@ function AppContent() {
               setSelectedPatient(patient);
               setActiveView("odontogram");
             }}
+            onBack={() => setActiveView("dashboard")}
           />
         )}
 
         {activeView === "odontogram" && (
           <>
-            <OdontogramChart patient={selectedPatient} />
+            <OdontogramChart
+              patient={selectedPatient}
+              onBack={() => setActiveView("patients")}
+            />
             <SingleToothEditor />
             <ConditionSidebar />
           </>

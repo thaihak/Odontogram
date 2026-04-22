@@ -50,7 +50,7 @@ const INITIAL_PATIENTS = [
   },
 ];
 
-export default function Patients({ onPatientSelect }) {
+export default function Patients({ onPatientSelect, onBack }) {
   // 2. Put the patients list into React State!
   const [patients, setPatients] = useState(INITIAL_PATIENTS);
 
@@ -72,12 +72,39 @@ export default function Patients({ onPatientSelect }) {
 
   return (
     <div className="patients-page">
-      {/* ... (Header stays exactly the same) ... */}
+      {/* Header with Back Button */}
       <header className="patients-header">
-        <div className="header-tabs">
-          <button className="tab-active">PATIENTS</button>
-          <button className="tab-inactive">APPOINTMENTS</button>
-          <button className="tab-inactive">REPORTS</button>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            flex: 1,
+          }}
+        >
+          {onBack && (
+            <button
+              onClick={onBack}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                color: "#0f172a",
+                padding: "0.5rem",
+                flexShrink: 0,
+              }}
+              title="Go back"
+            >
+              <ChevronLeft size={24} />
+            </button>
+          )}
+          <div className="header-tabs">
+            <button className="tab-active">PATIENTS</button>
+            <button className="tab-inactive">APPOINTMENTS</button>
+            <button className="tab-inactive">REPORTS</button>
+          </div>
         </div>
         <div className="header-user">
           <span className="user-name">Hak</span>
