@@ -133,7 +133,6 @@ export default function SingleToothEditor() {
               onDoubleClick={handleDblClick}
             >
               <div className="tooth-number-wrapper">
-                <div className="tooth-number">{fdi}</div>
                 <div className="probing-indicators">
                   {["plaque", "bleeding", "pus", "tartar"].map((p) => (
                     <div
@@ -146,13 +145,14 @@ export default function SingleToothEditor() {
               </div>
 
               <div
-                className="tooth-views"
+                className="tooth"
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "4px",
+                  gap: "3px",
                   alignItems: "center",
-                  width: "80%",
+                  width: "40px",
+                  height: "auto",
                 }}
               >
                 {viewOrder.map((viewType) => {
@@ -188,6 +188,9 @@ export default function SingleToothEditor() {
                           width: "100%", // Fills the container width
                           height: "auto", // Aspect ratio naturally calculates the height!
                           objectFit: "contain",
+                          ...(toothType !== "molar"
+                            ? { width: "80%", height: "80%" }
+                            : {}),
                         }}
                       />
                       {viewType === "normal" && (

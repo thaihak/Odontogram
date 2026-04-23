@@ -59,8 +59,20 @@ export default function Patients({ onPatientSelect, onBack }) {
 
   // 3. Update state when the modal sends back new patient data
   const handleSavePatient = (newPatientData) => {
-    // This takes all existing patients (...patients) and adds the new one at the end
-    setPatients([...patients, newPatientData]);
+    try {
+      console.log("Received patient data:", newPatientData);
+      // This takes all existing patients (...patients) and adds the new one at the end
+      setPatients((prevPatients) => {
+        const updatedPatients = [...prevPatients, newPatientData];
+        console.log("Updated patients list:", updatedPatients);
+        return updatedPatients;
+      });
+      // Close the modal after saving
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error handling save patient:", error);
+      alert("Error adding patient. Please try again.");
+    }
   };
 
   // Optional: Make the search bar actually work!

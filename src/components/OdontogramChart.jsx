@@ -31,7 +31,7 @@ const LEGEND_ITEMS = [
     label: "Braces",
     style: { background: "#f8fafc", border: "2px solid #cbd5e1" },
   },
-  { label: "Veneer", style: { background: "#e0f2fe", borderColor: "#0284c7" } },
+  { label: "Veneer", style: { background: "#f0fdfc", borderColor: "#0d9488" } },
   { label: "Pontic", style: { background: "#1e293b", borderColor: "#0f172a" } },
   {
     label: "Endo Tests",
@@ -90,7 +90,7 @@ export default function OdontogramChart({ onBack, patient }) {
                 width="28"
                 height="28"
                 viewBox="0 0 24 24"
-                fill="#3b82f6"
+                fill="#0d9488"
                 style={{ verticalAlign: "middle", marginRight: "8px" }}
               >
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3S13.66 11 12 11s-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />

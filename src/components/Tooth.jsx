@@ -27,6 +27,10 @@ export default function Tooth({ fdi, isUpper, forceNormalView }) {
   const useImplant = toothData.useImplantImage;
   const topFractureClass = toothData.topOverlayFractureClass;
 
+  // Adjust size for premolars, incisors, and canines (non-molars)
+  const toothStyle =
+    toothType !== "molar" ? { width: "80%", height: "80%" } : {};
+
   const handleToothClick = useCallback(
     (e) => {
       e.stopPropagation();
