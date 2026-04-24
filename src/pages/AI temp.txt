@@ -1,0 +1,333 @@
+
+}
+
+/* Procedures Section */
+.card-procedures {
+  height: auto;
+  flex: 1;
+  min-height: 250px; /* Forces enough room so it doesn't squish too far */
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+.proc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.proc-title {
+  font-weight: 600;
+  color: #111827;
+  font-size: 1.0625rem;
+}
+.proc-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+}
+
+.select-container {
+  position: relative;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+.select-input {
+  width: 100%;
+  appearance: none;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  background-color: white;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+.select-input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+.select-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.empty-procedures {
+  flex: 1;
+  border: 2px dashed #e5e7eb;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9fafb;
+  min-height: 100px;
+}
+.empty-text {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+/* Column 3: Reference & Planning */
+.col-reference {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex-shrink: 0;
+  min-height: 0; /* CRITICAL FIX */
+}
+@media (min-width: 1280px) {
+  .col-reference {
+    width: 380px;
+  }
+}
+
+.card-half {
+  flex: 1; /* Replaced height: 50% with flex: 1 so they evenly split space without overflowing */
+  min-height: 0;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+.panel-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.panel-title {
+  font-weight: 600;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.link-upload {
+  font-size: 0.8125rem;
+  color: #0d9488;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+.link-upload:hover {
+  color: #0f766e;
+  text-decoration: underline;
+}
+
+.tabs-scroll {
+  display: flex;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+.tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-button {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+.tab-button:hover {
+  background-color: #f3f4f6;
+}
+.tab-button.active {
+  background-color: #0d9488;
+  color: white;
+  border-color: #0d9488;
+}
+
+.empty-images {
+  flex: 1;
+  border: 2px dashed #e5e7eb;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9fafb;
+  min-height: 100px;
+}
+.empty-images-text {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+}
+.plan-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.plan-textarea {
+  flex: 1; /* Fixed height issue */
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+  outline: none;
+  resize: none;
+  background-color: #fefce8;
+  font-family: inherit;
+  color: #111827;
+  transition: all 0.2s ease;
+  min-height: 100px;
+}
+.plan-textarea::placeholder {
+  color: #9ca3af;
+}
+.plan-textarea:focus {
+  border-color: #0d9488;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+wrapper .react-datepicker-wrapper {
+  width: 100%;
+x; /* Soft, friendly corners */
+  text-decoration: none;
+  cursor: pointer;
+
+  /* Depth & Animation */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth, natural easing */
+}
+
+/* Hover State - Tempting to click */
+.link-upload:hover {
+  background-color: #0f766e; /* Slightly darker on hover */
+  transform: translateY(-2px); /* Lifts up slightly */
+  box-shadow:
+    0 4px 6px -1px rgba(13, 148, 136, 0.25),
+    0 2px 4px -2px rgba(13, 148, 136, 0.1); /* Adds a colored shadow for a glow effect */
+}
+
+/* Active State - Tactile feedback when pressed */
+.link-upload:active {
+  transform: translateY(0); /* Presses back down */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background-color: #115e59; /* Even darker teal to indicate a physical press */
+}
+
+/* Accessibility - Important for keyboard users */
+.link-upload:focus-visible {
+  outline: 2px solid #0d9488;
+  outline-offset: 2px;
+}
+.tabs-scroll {
+  display: flex;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+.tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-button {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+.tab-button:hover {
+  background-color: #f3f4f6;
+}
+.tab-button.active {
+  background-color: #0d9488;
+  color: white;
+  border-color: #0d9488;
+}
+
+.empty-images {
+  flex: 1;
+  border: 2px dashed #e5e7eb;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9fafb;
+  min-height: 100px;
+}
+.empty-images-text {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+}
+.plan-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.plan-textarea {
+  flex: 1;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+  outline: none;
+  resize: none;
+  background-color: #fefce8;
+  font-family: inherit;
+  color: #111827;
+  transition: all 0.2s ease;
+  min-height: 150px;
+}
+.plan-textarea::placeholder {
+  color: #9ca3af;
+}
+.plan-textarea:focus {
+  border-color: #0d9488;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
