@@ -11,6 +11,7 @@ import {
   FileText,
   AlertCircle,
   Trash2,
+  UploadCloud,
 } from "lucide-react";
 
 // --- Procedure Catalog ---
@@ -352,28 +353,90 @@ const procedureCatalog = [
   },
 ];
 
-// Reusable UI Components
-const Card = ({ children, className = "", style = {} }) => (
-  <div className={`card ${className}`} style={style}>
+// Reusable UI Components Styled with Modern Inline CSS
+const Card = ({ children, style = {} }) => (
+  <div
+    style={{
+      background: "#ffffff",
+      borderRadius: "1.25rem",
+      border: "1px solid #f1f5f9",
+      boxShadow:
+        "0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden", // Ensures content stays inside rounded corners
+      boxSizing: "border-box",
+      ...style,
+    }}
+  >
     {children}
   </div>
 );
 
-const TextAreaField = ({ label, placeholder, minHeight = "80px" }) => (
-  <div className="textarea-field">
-    <label className="textarea-label">{label}</label>
-    <textarea
-      className="textarea-input"
-      style={{ minHeight }}
-      placeholder={placeholder}
-    />
-  </div>
-);
+const TextAreaField = ({
+  label,
+  placeholder,
+  minHeight = "80px",
+  isYellow = false,
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.5rem",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      <label
+        style={{
+          fontSize: "0.75rem",
+          fontWeight: "700",
+          color: "#64748b",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+        }}
+      >
+        {label}
+      </label>
+      <textarea
+        placeholder={placeholder}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        style={{
+          width: "100%",
+          minHeight,
+          padding: "1rem",
+          borderRadius: "0.75rem",
+          border: isFocused ? "1px solid #0d9488" : "1px solid #e2e8f0",
+          backgroundColor: isYellow ? "#fffbeb" : "#f8fafc",
+          outline: "none",
+          boxSizing: "border-box",
+          fontSize: "0.875rem",
+          color: "#0f172a",
+          resize: "vertical",
+          boxShadow: isFocused
+            ? "0 0 0 3px rgba(13, 148, 136, 0.1)"
+            : "inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)",
+          transition: "all 0.2s ease",
+        }}
+      />
+    </div>
+  );
+};
 
 // Main Application Component
-export default function App({ patient, onBack, onOpenOdontogram }) {
+export default function App({
+  patient = { name: "Sokha Chea" },
+  onBack,
+  onOpenOdontogram,
+}) {
   const [selectedProcedures, setSelectedProcedures] = useState([]);
-  const [isSelectFocused, setIsSelectFocused] = useState(false);
+  const [saveHover, setSaveHover] = useState(false);
+  const [completeHover, setCompleteHover] = useState(false);
+  const [imageTab, setImageTab] = useState("All");
 
   const handleAddProcedure = (e) => {
     const code = e.target.value;
@@ -406,55 +469,240 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
   }, 0);
 
   return (
-    <div className="app-container">
-      {/* Header (Fixed) */}
-      <header className="app-header">
-        <div className="header-group">
+    <div
+      style={{
+        /* FORCE FULL SCREEN OVERLAY: Breaks out of parent container's margins */
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9999, // Ensure it's on top of everything else in your app
+        overflowX: "hidden",
+        overflowY: "auto",
+        margin: 0,
+        padding: 0,
+
+        /* STYLES */
+        backgroundColor: "#f8fafc",
+        backgroundImage:
+          "radial-gradient(ellipse at top right, rgba(204, 251, 241, 0.4), transparent), radial-gradient(ellipse at bottom left, rgba(241, 245, 249, 0.9), transparent)",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        color: "#0f172a",
+        display: "flex",
+        flexDirection: "column",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* Header (Fixed and Full Width) */}
+      <header
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgba(226, 232, 240, 0.6)",
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          width: "100%",
+          padding: "1rem 2rem",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+          boxSizing: "border-box",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           {onBack && (
-            <button className="btn-back" onClick={onBack}>
-              <ArrowLeft className="icon-sm" />
-              Back
+            <button
+              onClick={onBack}
+              style={{
+                background: "#fff",
+                border: "1px solid #e2e8f0",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                color: "#64748b",
+                padding: "0.5rem 1rem",
+                borderRadius: "9999px",
+                fontWeight: "600",
+                fontSize: "0.875rem",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#f8fafc")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#fff")
+              }
+            >
+              <ArrowLeft size={16} /> Back
             </button>
           )}
-          <div className="header-divider"></div>
-          <h1 className="header-title">
+          <div
+            style={{
+              width: "1px",
+              height: "24px",
+              backgroundColor: "#e2e8f0",
+              margin: "0 0.5rem",
+            }}
+          ></div>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "1.25rem",
+              fontWeight: "bold",
+              color: "#0f172a",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+            }}
+          >
             Dental Encounter{" "}
-            <span className="header-subtitle">
-              — {patient?.name || "Unknown Patient"}
+            <span style={{ color: "#cbd5e1", fontWeight: "400" }}>—</span>{" "}
+            <span
+              style={{
+                color: "#0d9488",
+                fontWeight: "600",
+                fontSize: "1.125rem",
+              }}
+            >
+              {patient?.name || "Unknown Patient"}
             </span>
           </h1>
         </div>
-        <div className="header-group">
-          <button className="btn-save">
-            <Save className="icon-sm" />
-            Save
+
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <button
+            onMouseEnter={() => setSaveHover(true)}
+            onMouseLeave={() => setSaveHover(false)}
+            style={{
+              background: saveHover ? "#f8fafc" : "#fff",
+              border: "1px solid #e2e8f0",
+              color: "#475569",
+              padding: "0.625rem 1.25rem",
+              borderRadius: "9999px",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "0.875rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <Save size={18} /> Save
           </button>
-          <button className="btn-complete">
-            <CheckCircle className="icon-sm" />
-            Sign & Complete
+          <button
+            onMouseEnter={() => setCompleteHover(true)}
+            onMouseLeave={() => setCompleteHover(false)}
+            style={{
+              background: completeHover
+                ? "linear-gradient(to right, #0f4d4a, #0d3b39)"
+                : "linear-gradient(to right, #115e59, #0f4d4a)",
+              color: "white",
+              padding: "0.625rem 1.5rem",
+              borderRadius: "9999px",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "0.875rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              boxShadow: completeHover
+                ? "0 10px 15px -3px rgba(17, 94, 89, 0.2)"
+                : "0 4px 6px -1px rgba(17, 94, 89, 0.1)",
+              transform: completeHover ? "translateY(-1px)" : "translateY(0)",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <CheckCircle size={18} strokeWidth={2.5} /> Sign & Complete
           </button>
         </div>
       </header>
 
-      {/* Main Dashboard Layout */}
-      <main className="main-content">
+      {/* Main Dashboard Layout - Strictly Forced to 3 Columns */}
+      <main
+        style={{
+          flex: 1,
+          padding: "1.5rem",
+          width: "100%",
+          boxSizing: "border-box",
+          display: "grid",
+          // FORCED 3 COLUMNS: This strictly locks the grid to 3 equal columns, no wrapping.
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gap: "1.5rem",
+          alignItems: "start",
+        }}
+      >
         {/* Column 1: Clinical Notes */}
-        <Card className="col-notes">
-          <div className="col-notes-header">
-            <div className="col-notes-title">
-              <ClipboardList className="icon-md text-gray" />
-              <h2>Clinical Notes</h2>
+        <Card>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              borderBottom: "1px solid #f1f5f9",
+              padding: "1.25rem",
+              paddingBottom: "1rem",
+            }}
+          >
+            <div
+              style={{
+                background: "#f0fdfa",
+                padding: "0.5rem",
+                borderRadius: "0.6rem",
+                color: "#0d9488",
+              }}
+            >
+              <ClipboardList size={20} />
             </div>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "1.125rem",
+                fontWeight: "bold",
+                color: "#0f172a",
+              }}
+            >
+              Clinical Notes
+            </h2>
           </div>
 
-          <div className="notes-scroll-area">
-            {/* Chief Complaint */}
-            <div className="section-container">
-              <h3 className="section-header">
-                <ClipboardList className="icon-sm text-teal" /> Chief Complaint
-                & History
+          <div
+            style={{
+              padding: "1.25rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1.25rem",
+            }}
+          >
+            {/* Section 1 */}
+            <div>
+              <h3
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  color: "#0f172a",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  marginBottom: "0.75rem",
+                  marginTop: 0,
+                }}
+              >
+                <ClipboardList size={16} className="text-teal-600" /> Chief
+                Complaint & History
               </h3>
-              <div className="section-body">
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
                 <TextAreaField
                   label="Chief Complaint"
                   placeholder="Patient's primary reason for visit..."
@@ -468,12 +716,38 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
               </div>
             </div>
 
-            {/* Examination */}
-            <div className="section-container">
-              <h3 className="section-header">
-                <Activity className="icon-sm text-teal" /> Clinical Examination
+            <div
+              style={{
+                width: "100%",
+                height: "1px",
+                backgroundColor: "#f1f5f9",
+              }}
+            ></div>
+
+            {/* Section 2 */}
+            <div>
+              <h3
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  color: "#0f172a",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  marginBottom: "0.75rem",
+                  marginTop: 0,
+                }}
+              >
+                <Activity size={16} className="text-teal-600" /> Clinical
+                Examination
               </h3>
-              <div className="section-body">
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
                 <TextAreaField
                   label="Extraoral Examination"
                   placeholder="TMJ, lymph nodes, facial symmetry..."
@@ -489,7 +763,13 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
                   placeholder="Detailed intraoral findings, existing restorations..."
                   minHeight="80px"
                 />
-                <div className="grid-2">
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "0.75rem",
+                  }}
+                >
                   <TextAreaField
                     label="Occlusion"
                     placeholder="Class I/II/III..."
@@ -504,27 +784,73 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
               </div>
             </div>
 
-            {/* Diagnosis */}
-            <div className="section-container">
-              <h3 className="section-header">
-                <FileText className="icon-sm text-teal" /> Diagnosis
+            <div
+              style={{
+                width: "100%",
+                height: "1px",
+                backgroundColor: "#f1f5f9",
+              }}
+            ></div>
+
+            {/* Section 3 */}
+            <div>
+              <h3
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  color: "#0f172a",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  marginBottom: "0.75rem",
+                  marginTop: 0,
+                }}
+              >
+                <FileText size={16} className="text-teal-600" /> Diagnosis
               </h3>
-              <div className="section-body section-body-last">
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
                 <TextAreaField
                   label="Diagnosis Summary"
                   placeholder="List of current diagnoses..."
                   minHeight="100px"
                 />
                 <TextAreaField
-                  label="Caries Risk Assessment"
-                  placeholder="Low / Moderate / High with reasoning..."
+                  label="Caries Risk"
+                  placeholder="Low / Moderate / High..."
                   minHeight="60px"
                 />
-                <div className="alert-box">
-                  <AlertCircle className="icon-md text-amber" />
-                  <p className="alert-text">
-                    Ensure all diagnoses align with the documented intraoral
-                    examination.
+
+                <div
+                  style={{
+                    background: "#fffbeb",
+                    border: "1px solid #fde68a",
+                    padding: "0.75rem",
+                    borderRadius: "0.75rem",
+                    display: "flex",
+                    gap: "0.6rem",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <AlertCircle
+                    size={18}
+                    color="#d97706"
+                    style={{ flexShrink: 0, marginTop: "0.125rem" }}
+                  />
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.8rem",
+                      color: "#b45309",
+                      lineHeight: "1.4",
+                    }}
+                  >
+                    Ensure all diagnoses align with findings.
                   </p>
                 </div>
               </div>
@@ -532,132 +858,161 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
           </div>
         </Card>
 
-        {/* Column 2: Interactive Charting & Expanding Procedures */}
+        {/* Column 2: Interactive Charting & Procedures */}
         <div
-          className="col-interactive"
-          style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
-          <Card className="card-odontogram">
-            <div className="odontogram-header">
-              <Stethoscope className="icon-md text-dark" strokeWidth={2} />
-              <h2 className="odontogram-title">Odontogram</h2>
+          <Card style={{ padding: "1.25rem", gap: "1rem" }}>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+            >
+              <div style={{ color: "#475569" }}>
+                <Stethoscope size={22} strokeWidth={2} />
+              </div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "1.125rem",
+                  fontWeight: "bold",
+                  color: "#0f172a",
+                }}
+              >
+                Odontogram
+              </h2>
             </div>
-            <div className="odontogram-content">
-              <div className="tooth-graphic-container">
+
+            <div
+              style={{
+                padding: "0.5rem",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "280px",
+                  aspectRatio: "16/9",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#f8fafc",
+                  borderRadius: "0.75rem",
+                  border: "1px solid #f1f5f9",
+                }}
+              >
                 <img
                   src="/normal-img/Frame.png"
                   alt="Dental chart"
                   style={{
-                    maxWidth: "100%",
-                    maxHeight: "100%",
+                    maxWidth: "90%",
+                    maxHeight: "90%",
                     objectFit: "contain",
                   }}
                 />
               </div>
-              <p className="odontogram-desc">
-                Interactive multi-view dental chart with surface-level condition
-                mapping
+              <p
+                style={{
+                  textAlign: "center",
+                  color: "#64748b",
+                  fontSize: "0.85rem",
+                  margin: "0.75rem 0 0 0",
+                  lineHeight: "1.5",
+                }}
+              >
+                Interactive multi-view dental chart mapping.
               </p>
             </div>
-            <button className="btn-open-chart" onClick={onOpenOdontogram}>
-              <Stethoscope className="icon-md" />
+
+            <button
+              onClick={onOpenOdontogram}
+              style={{
+                width: "100%",
+                background: "#115e59",
+                color: "white",
+                padding: "0.75rem",
+                borderRadius: "0.75rem",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "0.9rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#0f4d4a")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#115e59")
+              }
+            >
+              <Stethoscope size={18} />
               Open Odontogram
             </button>
           </Card>
 
-          {/* EXPANDING PROCEDURE CARD */}
-          <Card
-            className="card-procedures"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              flexGrow: 1,
-              height: "fit-content", // Allows natural expansion
-              minHeight: "250px",
-              transition: "all 0.3s ease",
-            }}
-          >
+          <Card style={{ flex: 1, padding: "1.25rem", gap: "1rem" }}>
             <div
-              className="proc-header"
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "16px",
               }}
             >
-              <h2 className="proc-title" style={{ margin: 0 }}>
-                Procedures Performed
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "1.125rem",
+                  fontWeight: "bold",
+                  color: "#0f172a",
+                }}
+              >
+                Procedures
               </h2>
               <span
-                className="proc-badge"
                 style={{
-                  background: "#e0f2fe",
-                  color: "#0284c7",
-                  padding: "4px 10px",
-                  borderRadius: "12px",
-                  fontSize: "0.8rem",
-                  fontWeight: "bold",
+                  background: "#f0fdfa",
+                  color: "#0d9488",
+                  border: "1px solid #ccfbf1",
+                  padding: "0.2rem 0.6rem",
+                  borderRadius: "9999px",
+                  fontSize: "0.7rem",
+                  fontWeight: "700",
                 }}
               >
                 {selectedProcedures.length} items
               </span>
             </div>
 
-            {/* Enhanced Select Dropdown */}
-            <div
-              className="select-container"
-              style={{ position: "relative", marginBottom: "16px" }}
-            >
+            <div style={{ position: "relative" }}>
               <select
                 defaultValue=""
-                className="select-input"
                 onChange={handleAddProcedure}
-                onFocus={() => setIsSelectFocused(true)}
-                onBlur={() => setIsSelectFocused(false)}
                 style={{
                   width: "100%",
-                  padding: "14px 40px 14px 16px", // Extra right padding for the icon
-                  borderRadius: "8px",
-                  border: isSelectFocused
-                    ? "2px solid #0284c7"
-                    : "1px solid #d1d5db",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.75rem",
+                  border: "1px solid #e2e8f0",
                   outline: "none",
+                  boxSizing: "border-box",
+                  fontSize: "0.85rem",
                   appearance: "none",
-                  backgroundColor: "#ffffff",
-                  color: "#1f2937",
-                  fontSize: "0.95rem",
-                  fontWeight: "500",
-                  boxShadow: isSelectFocused
-                    ? "0 0 0 3px rgba(2, 132, 199, 0.15)"
-                    : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                  backgroundColor: "#f8fafc",
                   cursor: "pointer",
-                  transition: "all 0.2s ease-in-out",
+                  color: "#0f172a",
                 }}
               >
-                <option value="" disabled style={{ color: "#9ca3af" }}>
-                  Search and add procedure (e.g. D1110)...
+                <option value="" disabled>
+                  Add procedure...
                 </option>
                 {procedureCatalog.map((category) => (
-                  <optgroup
-                    key={category.category}
-                    label={category.category}
-                    style={{
-                      color: "#6b7280",
-                      fontStyle: "normal",
-                      fontWeight: "600",
-                    }}
-                  >
+                  <optgroup key={category.category} label={category.category}>
                     {category.items.map((item) => (
-                      <option
-                        key={item.code}
-                        value={item.code}
-                        style={{
-                          color: "#111827",
-                          fontWeight: "normal",
-                          padding: "8px",
-                        }}
-                      >
+                      <option key={item.code} value={item.code}>
                         {item.code} - {item.name} ({item.price})
                       </option>
                     ))}
@@ -665,47 +1020,44 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
                 ))}
               </select>
               <SelectIcon
-                className="icon-sm select-icon"
+                size={16}
                 style={{
                   position: "absolute",
-                  right: "14px",
+                  right: "1rem",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: isSelectFocused ? "#0284c7" : "#9ca3af",
+                  color: "#94a3b8",
                   pointerEvents: "none",
-                  transition: "color 0.2s ease-in-out",
                 }}
               />
             </div>
 
-            {/* Expanding List Area (No Internal Scroll) */}
-            <div
-              style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
-            >
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               {selectedProcedures.length === 0 ? (
                 <div
                   style={{
+                    marginTop: "0.5rem",
+                    padding: "1.5rem",
+                    border: "1px dashed #e2e8f0",
+                    borderRadius: "0.75rem",
                     textAlign: "center",
-                    padding: "3rem 1rem",
-                    color: "#9ca3af",
-                    border: "2px dashed #e5e7eb",
-                    borderRadius: "8px",
-                    backgroundColor: "#f9fafb",
+                    color: "#94a3b8",
+                    fontSize: "0.8rem",
+                    fontStyle: "italic",
+                    backgroundColor: "#fafaf9",
                   }}
                 >
-                  <p style={{ margin: 0 }}>
-                    No procedures logged for today's encounter.
-                  </p>
+                  No procedures logged.
                 </div>
               ) : (
                 <ul
                   style={{
                     listStyle: "none",
                     padding: 0,
-                    margin: 0,
+                    margin: "0.5rem 0 0 0",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "10px",
+                    gap: "0.6rem",
                   }}
                 >
                   {selectedProcedures.map((proc) => (
@@ -715,55 +1067,63 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        padding: "14px",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                        backgroundColor: "#ffffff",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+                        padding: "0.75rem",
+                        border: "1px solid #f1f5f9",
+                        borderRadius: "0.6rem",
+                        backgroundColor: "#fff",
+                        boxShadow: "0 1px 2px 0 rgba(0,0,0,0.02)",
                       }}
                     >
                       <div
                         style={{
                           display: "flex",
                           flexDirection: "column",
-                          gap: "6px",
+                          gap: "0.2rem",
                         }}
                       >
                         <strong
-                          style={{ color: "#111827", fontSize: "0.95rem" }}
+                          style={{ fontSize: "0.8rem", color: "#0f172a" }}
                         >
                           {proc.code} - {proc.name}
                         </strong>
-                        <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
-                          {proc.khmer} • {proc.time} •{" "}
-                          <span style={{ color: "#059669", fontWeight: "600" }}>
+                        <span
+                          style={{
+                            fontSize: "0.7rem",
+                            color: "#64748b",
+                            display: "flex",
+                            gap: "0.4rem",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span>{proc.time}</span>
+                          <span
+                            style={{
+                              width: "3px",
+                              height: "3px",
+                              borderRadius: "50%",
+                              backgroundColor: "#cbd5e1",
+                            }}
+                          ></span>
+                          <span style={{ color: "#0d9488", fontWeight: "600" }}>
                             {proc.price}
                           </span>
                         </span>
                       </div>
                       <button
                         onClick={() => handleRemoveProcedure(proc.id)}
-                        title="Remove Procedure"
                         style={{
-                          background: "#fee2e2",
+                          background: "none",
                           border: "none",
-                          color: "#ef4444",
                           cursor: "pointer",
-                          padding: "8px",
+                          color: "#ef4444",
+                          padding: "0.4rem",
+                          borderRadius: "0.5rem",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "6px",
-                          transition: "background-color 0.2s",
                         }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.backgroundColor = "#fca5a5")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.backgroundColor = "#fee2e2")
-                        }
+                        title="Remove"
                       >
-                        <Trash2 className="icon-sm" />
+                        <Trash2 size={16} />
                       </button>
                     </li>
                   ))}
@@ -771,32 +1131,31 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
               )}
             </div>
 
-            {/* Total Footer */}
             {selectedProcedures.length > 0 && (
               <div
                 style={{
-                  marginTop: "16px",
-                  paddingTop: "16px",
-                  borderTop: "2px solid #e5e7eb",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  paddingTop: "0.75rem",
+                  borderTop: "1px dashed #e2e8f0",
+                  marginTop: "auto",
                 }}
               >
                 <span
                   style={{
+                    fontSize: "0.8rem",
                     fontWeight: "600",
-                    color: "#4b5563",
-                    fontSize: "1.05rem",
+                    color: "#64748b",
                   }}
                 >
-                  Total Estimate:
+                  Total:
                 </span>
                 <span
                   style={{
+                    fontSize: "1.1rem",
                     fontWeight: "bold",
-                    fontSize: "1.25rem",
-                    color: "#059669",
+                    color: "#0f172a",
                   }}
                 >
                   ${totalPrice.toFixed(2)}
@@ -807,40 +1166,123 @@ export default function App({ patient, onBack, onOpenOdontogram }) {
         </div>
 
         {/* Column 3: Reference & Planning */}
-        <div className="col-reference">
-          <Card className="card-half">
-            <div className="panel-header">
-              <div className="panel-title-wrapper">
-                <ImageIcon className="icon-md text-gray" />
-                <h2 className="panel-title">Dental Images</h2>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+        >
+          <Card style={{ padding: "1.25rem", gap: "1rem" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <ImageIcon size={20} className="text-slate-500" />
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: "1.125rem",
+                    fontWeight: "bold",
+                    color: "#0f172a",
+                  }}
+                >
+                  Images
+                </h2>
               </div>
-              <button className="link-upload">Upload</button>
+              <button
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#0d9488",
+                  fontWeight: "600",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                }}
+              >
+                Upload
+              </button>
             </div>
-            <div className="tabs-scroll">
-              <button className="tab-button active">All</button>
-              <button className="tab-button">PA</button>
-              <button className="tab-button">BW</button>
-              <button className="tab-button">OPG</button>
+
+            <div style={{ display: "flex", gap: "0.4rem" }}>
+              {["All", "PA", "BW", "OPG"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setImageTab(tab)}
+                  style={{
+                    background: imageTab === tab ? "#0d9488" : "#f1f5f9",
+                    color: imageTab === tab ? "#fff" : "#64748b",
+                    border: "none",
+                    padding: "0.3rem 0.75rem",
+                    borderRadius: "9999px",
+                    fontSize: "0.7rem",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
-            <div className="empty-images">
-              <ImageIcon className="icon-lg text-light" strokeWidth={1.5} />
-              <p className="empty-images-text">No images</p>
+
+            <div
+              style={{
+                padding: "2.5rem 1rem",
+                border: "2px dashed #e2e8f0",
+                borderRadius: "1rem",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#94a3b8",
+                gap: "0.5rem",
+                backgroundColor: "#fafaf9",
+              }}
+            >
+              <UploadCloud size={28} />
+              <span style={{ fontSize: "0.8rem", fontWeight: "500" }}>
+                No images
+              </span>
             </div>
           </Card>
 
-          <Card className="card-half plan-card">
-            <div className="panel-header">
-              <div className="panel-title-wrapper">
-                <FileText className="icon-md text-gray" />
-                <h2 className="panel-title">Treatment Plan</h2>
-              </div>
+          <Card style={{ flex: 1, padding: "1.25rem", gap: "1rem" }}>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+            >
+              <FileText size={20} className="text-slate-500" />
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "1.125rem",
+                  fontWeight: "bold",
+                  color: "#0f172a",
+                }}
+              >
+                Treatment Plan
+              </h2>
             </div>
-            <div className="plan-container">
-              <textarea
-                className="plan-textarea"
-                placeholder="Outline the proposed treatment plan, phases, and notes for the front desk..."
-              />
-            </div>
+            <textarea
+              placeholder="Outline proposed treatment plan..."
+              style={{
+                width: "100%",
+                minHeight: "200px",
+                flex: 1,
+                padding: "1rem",
+                borderRadius: "0.75rem",
+                border: "1px solid #fde68a",
+                backgroundColor: "#fffbeb",
+                outline: "none",
+                boxSizing: "border-box",
+                fontSize: "0.875rem",
+                color: "#0f172a",
+                resize: "vertical",
+                boxShadow: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)",
+              }}
+            />
           </Card>
         </div>
       </main>
